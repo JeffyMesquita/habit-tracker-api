@@ -12,6 +12,9 @@ services:
     image: postgres:9.6
     ports:
       - 5432:5432
+    env_file:
+      - .env
+    network_mode: 'host'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
