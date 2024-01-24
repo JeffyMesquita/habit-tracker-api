@@ -1,0 +1,131 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../docs/assets/erd.svg"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid())
+  email    String @unique
+  password String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role    Role     @relation(fields: [roleId], references: [id])
+  roleId  String
+  profile Profile?
+  address Address?
+  habits  Habit[]
+
+  @@map("users")
+}
+
+model Role {
+  id   String @id @default(uuid())
+  name String @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+
+  @@map("roles")
+}
+
+model Profile {
+  id         String    @id @default(uuid())
+  firstName  String?
+  lastName   String?
+  avatarUrl  String?
+  bio        String?
+  occupation String?
+  birthdate  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  @@map("profiles")
+}
+
+model Address {
+  id      String  @id @default(uuid())
+  city    String?
+  state   String?
+  country String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+
+  @@map("addresses")
+}
+
+model Habit {
+  id        String    @id @default(uuid())
+  title     String
+  frequency Int?
+  moment    DateTime?
+
+  createdAt DateTime
+  updatedAt DateTime @updatedAt
+
+  dayHabits DayHabit[]
+  weekDays  HabitWeekDays[]
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@unique([userId, title])
+  @@map("habits")
+}
+
+model HabitWeekDays {
+  id      String @id @default(uuid())
+  habitId String
+  weekDay Int
+
+  habit Habit @relation(fields: [habitId], references: [id])
+
+  @@unique([habitId, weekDay])
+  @@map("habit_week_days")
+}
+
+model Day {
+  id   String   @id @default(uuid())
+  date DateTime
+
+  dayHabits DayHabit[]
+
+  @@unique([date])
+  @@map("days")
+}
+
+model DayHabit {
+  id String @id @default(uuid())
+
+  dayId   String
+  habitId String
+
+  day   Day   @relation(fields: [dayId], references: [id])
+  habit Habit @relation(fields: [habitId], references: [id])
+
+  @@unique([dayId, habitId])
+  @@map("day_habits")
+}

@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2021",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@database/*": ["src/database/*"],
+      "@decorators/*": ["src/decorators/*"],
+      "@decorators": ["src/decorators/index.ts"],
+      "@guards/*": ["src/guards/*"],
+      "@interfaces/*": ["src/interfaces/*"],
+      "@libs/*": ["src/libs/*"],
+      "@misc/*": ["src/misc/*"],
+      "@modules/*": ["src/modules/*"],
+      "@services/*": ["src/services/*"],
+    },
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
