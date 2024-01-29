@@ -23,11 +23,22 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  role    Role     @relation(fields: [roleId], references: [id])
-  roleId  String
-  profile Profile?
-  address Address?
-  habits  Habit[]
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
+
+  profile              Profile?
+  address              Address?
+  habits               Habit[]
+  PremiumSubscription  PremiumSubscription?
+  DailyHabitProgress   DailyHabitProgress[]
+  DailyProgressSummary DailyProgressSummary[]
+  HabitStreak          HabitStreak[]
+  UserMetrics          UserMetrics[]
+  UserGoals            UserGoals[]
+  UserActivityLog      UserActivityLog[]
+  Achievements         Achievements[]
+  UserPreferences      UserPreferences[]
+  UserInteractions     UserInteractions[]
 
   @@map("users")
 }
@@ -62,6 +73,18 @@ model Profile {
   @@map("profiles")
 }
 
+model PremiumSubscription {
+  id          String    @id @default(uuid())
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @unique
+  startDate   DateTime  @default(now())
+  months      Int       @default(1)
+  renewalDate DateTime
+  lastRenewal DateTime?
+
+  @@map("premium_subscriptions")
+}
+
 model Address {
   id      String  @id @default(uuid())
   city    String?
@@ -89,8 +112,9 @@ model Habit {
   dayHabits DayHabit[]
   weekDays  HabitWeekDays[]
 
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
+  user               User                 @relation(fields: [userId], references: [id])
+  userId             String
+  DailyHabitProgress DailyHabitProgress[]
 
   @@unique([userId, title])
   @@map("habits")
@@ -128,4 +152,122 @@ model DayHabit {
 
   @@unique([dayId, habitId])
   @@map("day_habits")
+}
+
+model DailyHabitProgress {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String
+  habit          Habit    @relation(fields: [habitId], references: [id])
+  habitId        String
+  date           DateTime
+  completedCount Int
+
+  @@map("daily_habit_progress")
+}
+
+model DailyProgressSummary {
+  id              String   @id @default(uuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  date            DateTime
+  totalHabits     Int
+  completedHabits Int
+
+  @@map("daily_progress_summary")
+}
+
+model HabitStreak {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  startDate DateTime
+  endDate   DateTime
+
+  @@map("habit_streaks")
+}
+
+model UserMetrics {
+  id                    String @id @default(uuid())
+  user                  User   @relation(fields: [userId], references: [id])
+  userId                String
+  averageCompletionRate Float
+  longestStreak         Int
+
+  @@map("user_metrics")
+}
+
+model UserGoals {
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  goalType    String
+  targetValue Int
+  startDate   DateTime
+  endDate     DateTime
+
+  @@map("user_goals")
+}
+
+model UserFeedback {
+  id           String   @id @default(uuid())
+  userId       String?
+  feedbackType String
+  timestamp    DateTime @default(now())
+  comments     String?
+
+  @@map("user_feedback")
+}
+
+model UserActivityLog {
+  id           String   @id @default(uuid())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  activityType String
+  timestamp    DateTime @default(now())
+  details      String?
+
+  @@map("user_activity_log")
+}
+
+model Achievements {
+  id              String   @id @default(uuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  achievementType String
+  timestamp       DateTime @default(now())
+
+  @@map("achievements")
+}
+
+model UserPreferences {
+  id                   String  @id @default(uuid())
+  user                 User    @relation(fields: [userId], references: [id])
+  userId               String
+  notificationSettings Json?
+  theme                String?
+
+  @@map("user_preferences")
+}
+
+model UserInteractions {
+  id              String   @id @default(uuid())
+  user            User     @relation(fields: [userId], references: [id])
+  userId          String
+  interactionType String
+  timestamp       DateTime @default(now())
+  details         String?
+
+  @@map("user_interactions")
+}
+
+model UserSurveyResponses {
+  id         String   @id @default(uuid())
+  userId     String?
+  surveyType String
+  questionId String
+  response   String
+  timestamp  DateTime @default(now())
+
+  @@map("user_survey_responses")
 }

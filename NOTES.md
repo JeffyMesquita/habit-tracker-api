@@ -32,7 +32,7 @@ $ yarn start:dev
 ## Generating a resource
 
 ```bash
-$ npx nest generate resource 
+$ npx nest generate resource
 # or
 $ yarn generate resource
 
@@ -40,7 +40,7 @@ $ yarn generate resource
 $ npx nest generate resource users
 # or
 $ yarn generate resource users
-# or 
+# or
 $ yarn generate resource
 
 # Output
@@ -58,4 +58,20 @@ UPDATE src/app.module.ts (246 bytes)
 $ npx prisma init
 # or
 $ yarn prisma init
+```
+
+## Generate Prisma Client
+
+```bash
+$ npx prisma generate
+# or
+$ yarn prisma generate
+```
+
+## Migrate database
+
+```bash
+$ npx prisma migrate dev --name init
+# or
+$ yarn prisma migrate dev --name init
 ```
