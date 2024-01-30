@@ -1,8 +1,6 @@
-import { AppController } from '@/app.controller';
-import { AppService } from '@/app.service';
 import { PrismaModule } from '@/database/prisma.module';
-import { Module } from '@nestjs/common';
 import { AppModule as AppClientModule } from '@modules/app/app.module';
+import { Module } from '@nestjs/common';
 
 import { ConfigModule } from '@nestjs/config';
 
@@ -15,7 +13,6 @@ import { ConfigModule } from '@nestjs/config';
 		PrismaModule,
 		AppClientModule,
 	],
-	controllers: [AppController],
-	providers: [AppService],
+	controllers: [],
 })
 export class AppModule {}
