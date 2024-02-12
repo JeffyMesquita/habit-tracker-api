@@ -20,6 +20,7 @@ model User {
   email    String @unique
   password String
 
+  verified  Boolean? @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -83,6 +84,18 @@ model PremiumSubscription {
   lastRenewal DateTime?
 
   @@map("premium_subscriptions")
+}
+
+model ConfirmEmail {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  attempts  Int      @default(0)
+  code      String
+  expiresAt DateTime
+
+  @@map("confirm_emails")
 }
 
 model Address {
