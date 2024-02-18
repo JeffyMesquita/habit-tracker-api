@@ -1,7 +1,9 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserService } from './user.service';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
+import { UserLoginDTO } from './dtos/UserLogin.dto';
+import { UserService } from './user.service';
+// import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @ApiTags('Authentications')
 @Controller('/app/user')
@@ -25,7 +27,25 @@ export class UserController {
 	}
 
 	@Post('/login')
-	async login(@Body() { email, password }: CreateAccountDTO) {
+	async login(@Body() { email, password }: UserLoginDTO) {
 		return this.userService.login(email, password);
 	}
+
+	@ApiBearerAuth()
+	@Get('/me')
+	async me(@Req() req: Request) {
+		return this.userService.me(req);
+	}
+
+	@ApiBearerAuth()
+	@Get('/logout')
+	async logout(@Req() req: Request) {
+		return this.userService.logout(req);
+	}
+
+	// @ApiBearerAuth()
+	// @Patch('/profile/:id')
+	// async updateProfile(@Req() req: Request, @Body() body: UpdateProfileDTO) {
+	// 	return this.userService.updateProfile(req, body);
+	// }
 }

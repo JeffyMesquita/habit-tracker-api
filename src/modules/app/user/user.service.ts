@@ -9,6 +9,8 @@ import * as bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
 import * as jwt from 'jsonwebtoken';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
+import { JwtPayload } from '@/@types/JwtPayload';
+// import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @Injectable()
 export class UserService {
@@ -18,7 +20,7 @@ export class UserService {
 		private resend: ResendEmailService,
 	) {}
 
-	async create({ email, password }: CreateAccountDTO) {
+	async create({ email, password, firstName }: CreateAccountDTO) {
 		const userExists = await this.prisma.user.findFirst({
 			where: {
 				email,
@@ -61,6 +63,13 @@ export class UserService {
 						userId: newUser?.id,
 						renewalDate: onMonthAfter,
 						lastRenewal: today,
+					},
+				});
+
+				await ctx.profile.create({
+					data: {
+						firstName,
+						userId: newUser.id,
 					},
 				});
 
@@ -262,11 +271,8 @@ export class UserService {
 				code: API_CODES.error.USER_NOT_FOUND,
 			});
 		}
-		const hashedPassword = bcrypt.hashSync(password, 10);
 
-		const passwordMatch = bcrypt.compareSync(hashedPassword, user.password);
-
-		console.log('passwordMatch', passwordMatch);
+		const passwordMatch = bcrypt.compareSync(password, user.password);
 
 		if (!passwordMatch) {
 			throw new BadRequestException({
@@ -289,4 +295,84 @@ export class UserService {
 			},
 		};
 	}
+
+	async me(req: Request) {
+		const token = req.headers['authorization'] as string;
+
+		if (!token) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.UNAUTHORIZED_ACCESS_TOKEN,
+			});
+		}
+
+		const userToken = token.split(' ')[1];
+
+		const decoded: JwtPayload = jwt.verify(
+			userToken,
+			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+		) as JwtPayload;
+
+		const user = await this.prisma.user.findFirst({
+			where: {
+				id: decoded.userId as string,
+			},
+		});
+
+		const userProfile = await this.prisma.profile.findFirst({
+			where: {
+				userId: user.id,
+			},
+		});
+
+		return {
+			message: 'Usuário encontrado!',
+			code: API_CODES.success.USER_FOUND,
+			data: {
+				user: {
+					...user,
+					password: undefined,
+				},
+				profile: userProfile,
+			},
+		};
+	}
+
+	async logout(req: Request) {
+		const token = req.headers['authorization'] as string;
+
+		if (!token) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.UNAUTHORIZED_ACCESS_TOKEN,
+			});
+		}
+
+		const userToken = token.split(' ')[1];
+
+		const decoded: JwtPayload = jwt.verify(
+			userToken,
+			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+		) as JwtPayload;
+
+		const user = await this.prisma.user.findFirst({
+			where: {
+				id: decoded.userId as string,
+			},
+		});
+
+		if (!user) {
+			throw new BadRequestException({
+				message: 'Usuário não encontrado!',
+				code: API_CODES.error.USER_NOT_FOUND,
+			});
+		}
+
+		return {
+			message: 'Usuário deslogado com sucesso!',
+			code: API_CODES.success.LOGGED_OUT_SUCCESSFULY,
+		};
+	}
+
+	// async updateProfile(req: Request, body: UpdateProfileDTO) {}
 }
