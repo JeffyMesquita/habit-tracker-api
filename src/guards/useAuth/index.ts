@@ -37,7 +37,7 @@ export class UseAuth implements CanActivate {
 				});
 			}
 
-			const user = await this.prisma.user.findUnique({
+			const user = await this.prisma.user.findFirst({
 				where: {
 					id: verify.subject,
 				},
@@ -54,8 +54,6 @@ export class UseAuth implements CanActivate {
 					code: API_CODES.error.EXPIRED_ACCESS_TOKEN,
 				});
 			}
-
-			console.log(err);
 
 			throw new BadRequestException();
 		}
