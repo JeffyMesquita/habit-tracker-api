@@ -309,17 +309,17 @@ export class UserService {
 		const token = jwt.sign(
 			{ userId: user.id },
 			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-			{ expiresIn: '30s' },
+			{ expiresIn: '8h' },
 		);
 
 		const refreshToken = jwt.sign(
 			{ userId: user.id },
 			this.config.get('JWT_REFRESH_TOKEN_SECRET'),
-			{ expiresIn: '2m' },
+			{ expiresIn: '7d' },
 		);
 
 		const created = dayjs().toDate();
-		const expires = dayjs().add(2, 'minutes').toDate();
+		const expires = dayjs().add(7, 'days').toDate();
 
 		await this.prisma.refreshToken.create({
 			data: {
@@ -465,17 +465,17 @@ export class UserService {
 		const token = jwt.sign(
 			{ userId: user.id },
 			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-			{ expiresIn: '30s' },
+			{ expiresIn: '8h' },
 		);
 
 		const newRefreshToken = jwt.sign(
 			{ userId: user.id },
 			this.config.get('JWT_REFRESH_TOKEN_SECRET'),
-			{ expiresIn: '2m' },
+			{ expiresIn: '7d' },
 		);
 
 		const created = dayjs().toDate();
-		const expires = dayjs().add(2, 'minutes').toDate();
+		const expires = dayjs().add(7, 'days').toDate();
 
 		await this.prisma.refreshToken.update({
 			where: {
