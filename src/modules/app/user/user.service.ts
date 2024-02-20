@@ -14,6 +14,7 @@ import dayjs from 'dayjs';
 import * as jwt from 'jsonwebtoken';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { JwtPayload } from '@/@types/JwtPayload';
+import { FilterEmailDTO } from './dtos/FilterEmail.dto';
 // import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @Injectable()
@@ -496,6 +497,28 @@ export class UserService {
 				refreshToken: newRefreshToken,
 				expires,
 			},
+		};
+	}
+
+	async emailAvailable(emailToValidate: FilterEmailDTO) {
+		const { email } = emailToValidate;
+
+		const user = await this.prisma.user.findFirst({
+			where: {
+				email,
+			},
+		});
+
+		if (user) {
+			return {
+				message: 'Email já cadastrado!',
+				isAvailable: false,
+			};
+		}
+
+		return {
+			message: 'Email disponível!',
+			isAvailable: true,
 		};
 	}
 

@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Req, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { Auth } from '@/guards/useAuth';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { UserLoginDTO } from './dtos/UserLogin.dto';
 import { UserService } from './user.service';
+import { FilterEmailDTO } from './dtos/FilterEmail.dto';
 // import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @ApiTags('Authentications')
@@ -50,6 +51,12 @@ export class UserController {
 	@Post('/refresh-token')
 	async refreshToken(@Body() { refreshToken }: { refreshToken: string }) {
 		return this.userService.refreshToken(refreshToken);
+	}
+
+	@ApiQuery({ name: 'email', required: true })
+	@Get('/email-available')
+	async emailAvailable(@Query() email: FilterEmailDTO) {
+		return this.userService.emailAvailable(email);
 	}
 
 	// @ApiBearerAuth()
