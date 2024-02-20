@@ -18,7 +18,6 @@ export class UserController {
 	}
 
 	@ApiBearerAuth()
-	@Auth()
 	@Post('/confirm-email')
 	async confirmEmail(@Req() req: Request, @Body() { code }: { code: string }) {
 		return this.userService.confirmEmail(req, code);
@@ -32,6 +31,34 @@ export class UserController {
 	@Post('/login')
 	async login(@Body() { email, password }: UserLoginDTO) {
 		return this.userService.login(email, password);
+	}
+
+	@Post('/forgot-password')
+	async forgotPassword(@Body() { email }: { email: string }) {
+		return this.userService.forgotPassword(email);
+	}
+
+	@ApiBearerAuth()
+	@Post('/reset-password')
+	async resetPassword(
+		@Req() req: Request,
+		@Body()
+		{
+			email,
+			tempPassword,
+			newPassword,
+		}: {
+			email: string;
+			tempPassword: string;
+			newPassword: string;
+		},
+	) {
+		return this.userService.resetPassword(
+			req,
+			email,
+			tempPassword,
+			newPassword,
+		);
 	}
 
 	@ApiBearerAuth()

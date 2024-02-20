@@ -98,6 +98,16 @@ model ConfirmEmail {
   @@map("confirm_emails")
 }
 
+model ResetPassword {
+  id           String   @id @default(uuid())
+  userId       String
+  email        String
+  tempPassword String
+  createdAt    DateTime @default(now())
+
+  @@map("reset_passwords")
+}
+
 model RefreshToken {
   id        String   @id @default(uuid())
   userId    String

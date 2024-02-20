@@ -3,6 +3,7 @@ import { ResendEmailService } from '@/libs/resend/resend.service';
 import API_CODES from '@/misc/API/codes';
 import { ROLES } from '@/misc/enums/roles';
 import { generateCode } from '@/misc/utils/generateCode';
+import { generateTempPassword } from '@/misc/utils/generateTempPassword';
 import {
 	BadRequestException,
 	Injectable,
@@ -15,6 +16,7 @@ import * as jwt from 'jsonwebtoken';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { JwtPayload } from '@/@types/JwtPayload';
 import { FilterEmailDTO } from './dtos/FilterEmail.dto';
+
 // import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @Injectable()
@@ -340,6 +342,152 @@ export class UserService {
 				expires,
 			},
 		};
+	}
+
+	async forgotPassword(email: string) {
+		const user = await this.prisma.user.findFirst({
+			where: {
+				email,
+			},
+		});
+
+		if (!user) {
+			throw new BadRequestException({
+				message: 'Usuário não encontrado!',
+				code: API_CODES.error.USER_NOT_FOUND,
+			});
+		}
+
+		const token = jwt.sign(
+			{ userId: user.id },
+			this.config.get('JWT_FORGOT_PASSWORD'),
+			{ expiresIn: '30m' },
+		);
+
+		const tempPassword = generateTempPassword();
+
+		await this.resend.sendEmailForgotPassword({
+			userEmail: user.email,
+			tempPassword,
+		});
+
+		await this.prisma.resetPassword.create({
+			data: {
+				userId: user.id,
+				email,
+				tempPassword,
+			},
+		});
+
+		return {
+			message: 'Enviamos um email com as instruções para redefinir sua senha!',
+			code: API_CODES.success.EMAIL_RESENT,
+			data: {
+				token,
+			},
+		};
+	}
+
+	async resetPassword(
+		req: Request,
+		email: string,
+		tempPassword: string,
+		newPassword: string,
+	) {
+		const token = req.headers['authorization'] as string;
+
+		if (!token) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const userToken = token.split(' ')[1];
+
+		const decoded: JwtPayload = jwt.verify(
+			userToken,
+			this.config.get('JWT_FORGOT_PASSWORD'),
+		) as JwtPayload;
+
+		if (!decoded || !decoded.userId) {
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const user = await this.prisma.user.findFirst({
+			where: {
+				email,
+			},
+		});
+
+		if (!user) {
+			throw new BadRequestException({
+				message: 'Email não encontrado!',
+				code: API_CODES.error.USER_NOT_FOUND,
+			});
+		}
+
+		const checkTempPassword = await this.prisma.resetPassword.findFirst({
+			where: {
+				userId: user.id,
+				tempPassword,
+			},
+		});
+
+		if (tempPassword !== checkTempPassword.tempPassword) {
+			throw new BadRequestException({
+				message: 'Código inválido!',
+				code: API_CODES.error.INVALID_CODE,
+			});
+		}
+
+		const userResetPassword = await this.prisma.resetPassword.findFirst({
+			where: {
+				userId: user.id,
+				tempPassword,
+			},
+		});
+
+		if (!userResetPassword) {
+			throw new BadRequestException({
+				message: 'Código inválido!',
+				code: API_CODES.error.INVALID_CODE,
+			});
+		}
+
+		const hashedPassword = bcrypt.hashSync(newPassword, 10);
+
+		const updatedUserPassword = await this.prisma.$transaction(
+			async (ctx) => {
+				await ctx.resetPassword.delete({
+					where: {
+						id: userResetPassword.id,
+					},
+				});
+
+				ctx.user.update({
+					where: {
+						id: user.id,
+					},
+					data: {
+						password: hashedPassword,
+					},
+				});
+
+				return {
+					message: 'Senha redefinida com sucesso!',
+					code: API_CODES.success.PASSWORD_RESETED,
+				};
+			},
+			{
+				timeout: 30000,
+			},
+		);
+
+		return updatedUserPassword;
 	}
 
 	async me(req: Request) {
