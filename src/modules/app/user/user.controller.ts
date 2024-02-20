@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Auth } from '@/guards/useAuth';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { UserLoginDTO } from './dtos/UserLogin.dto';
 import { UserService } from './user.service';
@@ -16,9 +17,10 @@ export class UserController {
 	}
 
 	@ApiBearerAuth()
+	@Auth()
 	@Post('/confirm-email')
-	async confirmEmail(@Body() { code }: { code: string }) {
-		return this.userService.confirmEmail(code);
+	async confirmEmail(@Req() req: Request, @Body() { code }: { code: string }) {
+		return this.userService.confirmEmail(req, code);
 	}
 
 	@Post('/resend-email')
@@ -32,15 +34,22 @@ export class UserController {
 	}
 
 	@ApiBearerAuth()
+	@Auth()
 	@Get('/me')
 	async me(@Req() req: Request) {
 		return this.userService.me(req);
 	}
 
 	@ApiBearerAuth()
+	@Auth()
 	@Get('/logout')
 	async logout(@Req() req: Request) {
 		return this.userService.logout(req);
+	}
+
+	@Post('/refresh-token')
+	async refreshToken(@Body() { refreshToken }: { refreshToken: string }) {
+		return this.userService.refreshToken(refreshToken);
 	}
 
 	// @ApiBearerAuth()

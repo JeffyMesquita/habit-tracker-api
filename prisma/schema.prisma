@@ -98,6 +98,16 @@ model ConfirmEmail {
   @@map("confirm_emails")
 }
 
+model RefreshToken {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@map("refresh_tokens")
+}
+
 model Address {
   id      String  @id @default(uuid())
   city    String?

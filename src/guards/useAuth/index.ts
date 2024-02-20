@@ -7,6 +7,7 @@ import {
 	UnauthorizedException,
 	BadRequestException,
 } from '@nestjs/common';
+import { applyDecorators, UseGuards } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class UseAuth implements CanActivate {
 	async canActivate(context: ExecutionContext): Promise<boolean> {
 		const request = context.switchToHttp().getRequest();
 		const token = this.getToken(request);
+
 		if (!token) {
 			throw new UnauthorizedException({
 				message: 'Você precisa estar logado para acessar este conteúdo.',
@@ -53,6 +55,8 @@ export class UseAuth implements CanActivate {
 				});
 			}
 
+			console.log(err);
+
 			throw new BadRequestException();
 		}
 	}
@@ -61,4 +65,8 @@ export class UseAuth implements CanActivate {
 		const [type, token] = request.headers['authorization']?.split(' ') ?? [];
 		return type === 'Bearer' ? token : undefined;
 	}
+}
+
+export function Auth() {
+	return applyDecorators(UseGuards(UseAuth));
 }

@@ -3,7 +3,11 @@ import { ResendEmailService } from '@/libs/resend/resend.service';
 import API_CODES from '@/misc/API/codes';
 import { ROLES } from '@/misc/enums/roles';
 import { generateCode } from '@/misc/utils/generateCode';
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+	BadRequestException,
+	Injectable,
+	UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import dayjs from 'dayjs';
@@ -112,29 +116,44 @@ export class UserService {
 		return res;
 	}
 
-	async confirmEmail(code: string) {
+	async confirmEmail(req: Request, code: string) {
 		const now = dayjs().toDate();
+		const token = req.headers['authorization'] as string;
 
-		const user = await this.prisma.confirmEmail.findFirst({
+		if (!token) {
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const userToken = token.split(' ')[1];
+
+		const decoded: JwtPayload = jwt.verify(
+			userToken,
+			this.config.get('JWT_SEND_EMAIL_CODE'),
+		) as JwtPayload;
+
+		const userConfirmEmail = await this.prisma.confirmEmail.findFirst({
 			where: {
-				code,
+				userId: decoded.userId as string,
 				expiresAt: {
 					gte: now,
 				},
 			},
 		});
 
-		if (!user) {
+		if (!userConfirmEmail) {
 			throw new BadRequestException({
 				message: 'Token inválido ou expirado!',
 				code: API_CODES.error.INVALID_TOKEN,
 			});
 		}
 
-		if (user.code !== code) {
-			await this.prisma.confirmEmail.update({
+		if (userConfirmEmail.code !== code) {
+			const updatedUserConfirmEmail = await this.prisma.confirmEmail.update({
 				where: {
-					id: user.id,
+					id: userConfirmEmail.id,
 				},
 				data: {
 					attempts: {
@@ -143,63 +162,66 @@ export class UserService {
 				},
 			});
 
-			throw new BadRequestException({
+			if (updatedUserConfirmEmail.attempts > 3) {
+				const token = jwt.sign(
+					{ userId: userConfirmEmail.userId },
+					this.config.get('JWT_SEND_EMAIL_CODE'),
+					{ expiresIn: '30m' },
+				);
+
+				const code = generateCode();
+				const thirtyMinutes = dayjs().add(30, 'minutes').toDate();
+
+				await this.prisma.confirmEmail.update({
+					where: {
+						id: userConfirmEmail.id,
+					},
+					data: {
+						token,
+						code,
+						expiresAt: thirtyMinutes,
+						attempts: 0,
+					},
+				});
+
+				const userInfo = await this.prisma.user.findFirst({
+					where: {
+						id: userConfirmEmail.userId,
+					},
+				});
+
+				await this.resend.sendEmailConfirmation({
+					userEmail: userInfo.email,
+					code,
+				});
+
+				return {
+					message: 'Código inválido! Enviamos um novo código para seu email!',
+					code: API_CODES.error.WRONG_CODE,
+					data: {
+						token,
+					},
+				};
+			}
+
+			return {
 				message: 'Código inválido!',
 				code: API_CODES.error.WRONG_CODE,
-			});
-		}
-
-		if (user.attempts >= 3) {
-			const token = jwt.sign(
-				{ userId: user.id },
-				this.config.get('JWT_SEND_EMAIL_CODE'),
-				{ expiresIn: '30m' },
-			);
-
-			const code = generateCode();
-			const thirtyMinutes = dayjs().add(30, 'minutes').toDate();
-
-			await this.prisma.confirmEmail.update({
-				where: {
-					id: user.id,
-				},
 				data: {
-					token,
-					code,
-					expiresAt: thirtyMinutes,
-					attempts: 0,
+					attempts: updatedUserConfirmEmail.attempts,
 				},
-			});
-
-			const userInfo = await this.prisma.user.findFirst({
-				where: {
-					id: user.userId,
-				},
-			});
-
-			await this.resend.sendEmailConfirmation({
-				userEmail: userInfo.email,
-				code,
-			});
-
-			throw new BadRequestException({
-				message: 'Você excedeu o número de tentativas!',
-				code: API_CODES.error.WRONG_CODE,
-				data: {
-					token,
-				},
-			});
+			};
 		}
 
 		await this.prisma.confirmEmail.delete({
 			where: {
-				id: user.id,
+				id: userConfirmEmail.id,
 			},
 		});
 
 		await this.prisma.user.update({
 			where: {
-				id: user.userId,
+				id: userConfirmEmail.userId,
 			},
 			data: {
 				verified: true,
@@ -209,6 +231,9 @@ export class UserService {
 		return {
 			message: 'Email confirmado com sucesso!',
 			code: API_CODES.success.EMAIL_CONFIRMED,
+			data: {
+				confirmed: true,
+			},
 		};
 	}
 
@@ -284,14 +309,34 @@ export class UserService {
 		const token = jwt.sign(
 			{ userId: user.id },
 			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-			{ expiresIn: '1d' },
+			{ expiresIn: '30s' },
 		);
+
+		const refreshToken = jwt.sign(
+			{ userId: user.id },
+			this.config.get('JWT_REFRESH_TOKEN_SECRET'),
+			{ expiresIn: '2m' },
+		);
+
+		const created = dayjs().toDate();
+		const expires = dayjs().add(2, 'minutes').toDate();
+
+		await this.prisma.refreshToken.create({
+			data: {
+				userId: user.id,
+				token: refreshToken,
+				createdAt: created,
+				expiresAt: expires,
+			},
+		});
 
 		return {
 			message: 'Logado com sucesso!',
 			code: API_CODES.success.LOGGED_IN_SUCCESSFULY,
 			data: {
 				token,
+				refreshToken,
+				expires,
 			},
 		};
 	}
@@ -312,6 +357,13 @@ export class UserService {
 			userToken,
 			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
 		) as JwtPayload;
+
+		if (!decoded || !decoded.userId) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.UNAUTHORIZED_ACCESS_TOKEN,
+			});
+		}
 
 		const user = await this.prisma.user.findFirst({
 			where: {
@@ -342,7 +394,7 @@ export class UserService {
 		const token = req.headers['authorization'] as string;
 
 		if (!token) {
-			throw new BadRequestException({
+			throw new UnauthorizedException({
 				message: 'Token inválido!',
 				code: API_CODES.error.UNAUTHORIZED_ACCESS_TOKEN,
 			});
@@ -371,6 +423,79 @@ export class UserService {
 		return {
 			message: 'Usuário deslogado com sucesso!',
 			code: API_CODES.success.LOGGED_OUT_SUCCESSFULY,
+		};
+	}
+
+	async refreshToken(refreshToken: string) {
+		const findToken = await this.prisma.refreshToken.findFirst({
+			where: {
+				token: refreshToken,
+			},
+		});
+
+		if (!findToken) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const now = dayjs().toDate();
+
+		if (now > findToken.expiresAt) {
+			throw new UnauthorizedException({
+				message: 'Token expirado!',
+				code: API_CODES.error.EXPIRED_TOKEN,
+			});
+		}
+
+		const user = await this.prisma.user.findFirst({
+			where: {
+				id: findToken.userId,
+			},
+		});
+
+		if (!user) {
+			throw new BadRequestException({
+				message: 'Usuário não encontrado!',
+				code: API_CODES.error.USER_NOT_FOUND,
+			});
+		}
+
+		const token = jwt.sign(
+			{ userId: user.id },
+			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+			{ expiresIn: '30s' },
+		);
+
+		const newRefreshToken = jwt.sign(
+			{ userId: user.id },
+			this.config.get('JWT_REFRESH_TOKEN_SECRET'),
+			{ expiresIn: '2m' },
+		);
+
+		const created = dayjs().toDate();
+		const expires = dayjs().add(2, 'minutes').toDate();
+
+		await this.prisma.refreshToken.update({
+			where: {
+				id: findToken.id,
+			},
+			data: {
+				token: newRefreshToken,
+				createdAt: created,
+				expiresAt: expires,
+			},
+		});
+
+		return {
+			message: 'Token atualizado com sucesso!',
+			code: API_CODES.success.TOKEN_REFRESHED,
+			data: {
+				token,
+				refreshToken: newRefreshToken,
+				expires,
+			},
 		};
 	}
 
