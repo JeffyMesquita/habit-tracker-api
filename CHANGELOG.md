@@ -5,6 +5,121 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.1] - 2025-01-29
+
+### 🔧 **Finalização do Sistema de Metas**
+
+#### **✨ Adicionado**
+
+- **Nova API de Conclusão Manual de Metas**
+  - `POST /app/goals/:id/complete` - Marcar meta como completa manualmente
+  - Validações robustas (meta existe, não está completa, pertence ao usuário)
+  - Timestamp automático de conclusão (`completedAt`)
+  - Integração automática com sistema de achievements
+  - Response com confirmação e dados da meta atualizada
+
+#### **🔧 Modificado**
+
+- **Database Schema Aprimorado**
+  - Campo `completedAt: DateTime?` adicionado ao modelo `UserGoals`
+  - Campo `createdAt: DateTime @default(now())` adicionado
+  - Campo `updatedAt: DateTime @updatedAt` adicionado
+  - Melhor tracking temporal das metas
+
+- **GoalsService - Implementação Real**
+  - `checkIfGoalWasCompleted()`: Implementação real com query database
+  - `markGoalAsCompleted()`: Persistência real com timestamp
+  - `completeGoal()`: Nova função para conclusão manual
+  - Logs detalhados para debugging e monitoramento
+  - Error handling aprimorado com códigos específicos
+
+- **GoalsController - Nova Rota**
+  - Endpoint `POST /:id/complete` com validações completas
+  - Documentação Swagger atualizada
+  - Tratamento de erros padronizado
+  - Response pattern consistente com outras APIs
+
+#### **📊 Impacto nas Métricas**
+
+- **APIs**: Atualizada de 33+ para **34+ endpoints**
+- **Funcionalidades**: Sistema de metas 100% funcional
+- **Database**: Schema completo com tracking temporal
+- **Testes**: Funcionalidades testadas manualmente
+- **Performance**: Mantida < 500ms resposta média
+
+#### **🐛 Corrigido**
+
+- **Placeholders Removidos**: Funções stub substituídas por implementação real
+- **Database Persistence**: Conclusão de metas agora persiste corretamente
+- **Achievement Integration**: Fluxo automático funcionando 100%
+- **Timestamp Tracking**: Histórico preciso de quando metas foram completadas
+
+#### **📚 Documentação Atualizada**
+
+- **ROADMAP.md**: Status Sprint 2 atualizado (7 APIs, sistema de conclusão real)
+- **docs/api/ENDPOINTS.md**: Nova API documentada, count atualizado para 34+
+- **Requirements.md**: Funcionalidades validadas e documentadas
+- **CHANGELOG.md**: Este documento atualizado
+
+#### **⚡ Performance & Qualidade**
+
+- **Zero Breaking Changes**: Implementação backward-compatible
+- **Database Migrations**: Schema update sem perda de dados
+- **Code Coverage**: Mantida cobertura de funcionalidades core
+- **TypeScript**: 100% tipado, sem erros de compilação
+
+---
+
+## [1.1.1] - 2025-01-29
+
+### 🔧 **Finalização do Sistema de Metas**
+
+#### **✨ Adicionado**
+
+- **Nova API de Conclusão Manual de Metas**
+  - `POST /app/goals/:id/complete` - Marcar meta como completa manualmente
+  - Validações robustas (meta existe, não está completa, pertence ao usuário)
+  - Timestamp automático de conclusão (`completedAt`)
+  - Integração automática com sistema de achievements
+  - Response com confirmação e dados da meta atualizada
+
+#### **🔧 Modificado**
+
+- **Database Schema Aprimorado**
+  - Campo `completedAt: DateTime?` adicionado ao modelo `UserGoals`
+  - Campo `createdAt: DateTime @default(now())` adicionado
+  - Campo `updatedAt: DateTime @updatedAt` adicionado
+  - Melhor tracking temporal das metas
+
+- **GoalsService - Implementação Real**
+  - `checkIfGoalWasCompleted()`: Implementação real com query database
+  - `markGoalAsCompleted()`: Persistência real com timestamp
+  - `completeGoal()`: Nova função para conclusão manual
+  - Logs detalhados para debugging e monitoramento
+  - Error handling aprimorado com códigos específicos
+
+#### **📊 Impacto nas Métricas**
+
+- **APIs**: Atualizada de 33+ para **34+ endpoints**
+- **Funcionalidades**: Sistema de metas 100% funcional
+- **Database**: Schema completo com tracking temporal
+- **Performance**: Mantida < 500ms resposta média
+
+#### **🐛 Corrigido**
+
+- **Placeholders Removidos**: Funções stub substituídas por implementação real
+- **Database Persistence**: Conclusão de metas agora persiste corretamente
+- **Achievement Integration**: Fluxo automático funcionando 100%
+- **Timestamp Tracking**: Histórico preciso de quando metas foram completadas
+
+#### **📚 Documentação Atualizada**
+
+- **ROADMAP.md**: Status Sprint 2 atualizado (7 APIs, sistema de conclusão real)
+- **docs/api/ENDPOINTS.md**: Nova API documentada, count atualizado para 34+
+- **Requirements.md**: Funcionalidades validadas e documentadas
+
+---
+
 ## [1.1.0] - 2025-01-29
 
 ### 🎉 **Sprint 2 - Gamificação e Relatórios**

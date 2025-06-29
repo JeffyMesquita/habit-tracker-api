@@ -140,12 +140,14 @@
 
 #### **🎯 Sistema de Metas Personalizadas**
 
-- ✅ CRUD completo de metas (6 APIs)
+- ✅ CRUD completo de metas (7 APIs)
 - ✅ 3 tipos: completion, streak, consistency
 - ✅ Progresso automático baseado em hábitos
 - ✅ Filtros por status e prioridade
 - ✅ Validação de datas e conflitos
 - ✅ Cálculo de progresso em tempo real
+- ✅ **Sistema de conclusão real** com timestamps
+- ✅ **API de conclusão manual** (POST /goals/:id/complete)
 
 #### **🏆 Sistema de Achievements**
 
@@ -174,11 +176,13 @@
 
 ### **📈 Entregáveis Sprint 2**
 
-- **+12 APIs novas** (total: 33+)
+- **+13 APIs novas** (total: 34+)
 - **+36 testes** (total: 62, 100% pass)
 - **3 módulos novos** completamente integrados
 - **Arquitetura sem circular dependencies**
 - **Gamificação completa** funcional
+- **Sistema de conclusão de metas** com persistência real
+- **Database schema** atualizado com tracking de completion
 
 ### **🏆 Achievements Implementados**
 

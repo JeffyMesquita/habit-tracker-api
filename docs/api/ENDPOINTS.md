@@ -12,13 +12,13 @@
 | -------------- | ------- | ----------- | ----------- | ------------- |
 | Authentication | 8       | ✅ Complete | ✅ 12 tests | ✅ Full       |
 | Habits         | 8       | ✅ Complete | ✅ 15 tests | ✅ Full       |
-| Goals          | 6       | ✅ Complete | ✅ 22 tests | ✅ Full       |
+| Goals          | 7       | ✅ Complete | ✅ 22 tests | ✅ Full       |
 | Achievements   | 4       | ✅ Complete | ✅ 14 tests | ✅ Full       |
 | Analytics      | 2       | ✅ Complete | ✅ 11 tests | ✅ Full       |
 | Reports        | 3+      | ✅ Complete | ❌ 0 tests  | ✅ Full       |
 | User Profile   | 3       | ✅ Complete | ✅ 6 tests  | ✅ Full       |
 | Notifications  | 0       | 📋 Sprint 3 | ❌ 0 tests  | 📋 Planning   |
-| **TOTAL**      | **33+** | **✅ 94%**  | **✅ 62**   | **✅ 94%**    |
+| **TOTAL**      | **34+** | **✅ 94%**  | **✅ 62**   | **✅ 94%**    |
 
 ---
 
@@ -164,7 +164,7 @@
 
 ---
 
-## 🎯 **Goals System APIs (6 endpoints)**
+## 🎯 **Goals System APIs (7 endpoints)**
 
 ### **POST /app/goals**
 
@@ -216,6 +216,16 @@
 - **Auth**: Required
 - **Response**: Progresso com métricas e timeline
 - **Features**: Cálculo automático baseado em hábitos
+
+### **POST /app/goals/:id/complete**
+
+- **Função**: Marcar meta como completa manualmente
+- **Status**: ✅ Complete
+- **Auth**: Required
+- **Body**: Não requer body
+- **Features**: Timestamp automático, integração com achievements
+- **Validations**: Meta existe, não está completa, pertence ao usuário
+- **Response**: Confirmação com timestamp de conclusão
 
 ---
 
@@ -435,6 +445,6 @@ Headers: {
 
 ---
 
-**📅 Última atualização**: Janeiro 2025 | **Total APIs**: 33+ funcionais
+**📅 Última atualização**: Janeiro 2025 | **Total APIs**: 34+ funcionais
 
 **🎯 Próxima atualização**: Sprint 3 - Notifications APIs\*\*

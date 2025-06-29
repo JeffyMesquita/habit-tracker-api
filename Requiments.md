@@ -17,7 +17,7 @@
 - **🏆 Sistema de Achievements COMPLETO** (12 conquistas, desbloqueio automático)
 - **📊 Relatórios Avançados COMPLETO** (semanal, mensal, customizável, PDF/CSV/JSON)
 - **⚡ Integração Automática** (Habits → Goals → Achievements)
-- **📱 33+ APIs funcionais** (8 Auth + 8 Habits + 6 Goals + 4 Achievements + 3+ Reports + 2 Analytics + 3 Profile)
+- **📱 34+ APIs funcionais** (8 Auth + 8 Habits + 7 Goals + 4 Achievements + 3+ Reports + 2 Analytics + 3 Profile)
 - **🧪 62 testes automatizados** (100% aprovação)
 
 ### 🚀 Próximo Sprint (Sprint 3 - Fevereiro 2025)
@@ -51,7 +51,7 @@
 - ✅ **ROADMAP completo** - Visão estratégica até 2027
 - ✅ **Sprint 2 finalizado** - Gamificação e relatórios
 - ✅ **Sprint 3 planejado** - Sistema de notificações detalhado
-- ✅ **API documentation** - 33+ endpoints documentados
+- ✅ **API documentation** - 34+ endpoints documentados
 - ✅ **Architecture docs** - Módulos e integração
 - ✅ **Testing strategy** - 62 testes, 100% pass rate
 
@@ -182,8 +182,14 @@
 **4.3 [✅] RF020 - Gestão de Metas:**
 
 - Sistema deve permitir CRUD completo de metas.
-- **Status**: ✅ **IMPLEMENTADO** (6 APIs completas)
-- **Recursos**: Filtros por status, atualização dinâmica, validação de conflitos
+- **Status**: ✅ **IMPLEMENTADO** (7 APIs completas)
+- **Recursos**: Filtros por status, atualização dinâmica, validação de conflitos, conclusão manual
+
+**4.4 [✅] RF020.1 - Conclusão Manual de Metas:**
+
+- Sistema deve permitir marcar metas como completas manualmente.
+- **Status**: ✅ **IMPLEMENTADO** (`POST /app/goals/:id/complete`)
+- **Recursos**: Timestamp automático, validações robustas, integração com achievements
 
 ### 5. Sistema de Achievements ✅
 
@@ -254,8 +260,8 @@
 ### **🎯 Funcionalidades Implementadas**
 
 - **Sprint 1**: 21 APIs, 26 testes, MVP completo
-- **Sprint 2**: +12 APIs, +36 testes, Gamificação completa
-- **Total**: 33+ APIs, 62 testes, 7 módulos funcionais
+- **Sprint 2**: +13 APIs, +36 testes, Gamificação completa
+- **Total**: 34+ APIs, 62 testes, 7 módulos funcionais
 
 ### **📈 Status por Categoria**
 
@@ -263,7 +269,7 @@
 | ---------------- | ------------ | ----- | ---------- |
 | **Autenticação** | 8/8 APIs     | 8     | 100% ✅    |
 | **Hábitos**      | 8/8 APIs     | 8     | 100% ✅    |
-| **Metas**        | 6/6 APIs     | 6     | 100% ✅    |
+| **Metas**        | 7/7 APIs     | 7     | 100% ✅    |
 | **Achievements** | 4/4 APIs     | 4     | 100% ✅    |
 | **Relatórios**   | 3/3 APIs     | 3     | 100% ✅    |
 | **Analytics**    | 2/2 APIs     | 2     | 100% ✅    |
@@ -305,6 +311,6 @@
 
 ---
 
-**📅 Última atualização**: Janeiro 2025 | **Versão**: 1.1.0
+**📅 Última atualização**: Janeiro 2025 | **Versão**: 1.1.1
 
 **📚 Para documentação completa, consulte [docs/INDEX.md](docs/INDEX.md)**
