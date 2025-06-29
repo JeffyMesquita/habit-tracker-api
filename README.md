@@ -399,7 +399,7 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 
 ## 👨‍💻 **Desenvolvedor**
 
-**Seu Nome**
+**Jeferson Mesquita(Jeffy)**
 📧 Email: je_2742@hotmail.com
 💼 LinkedIn: [linkedin.com/in/jeffymesquita](https://linkedin.com/in/jeffymesquita)
 🐙 GitHub: [github.com/jeffymesquita](https://github.com/jeffymesquita)
@@ -408,7 +408,7 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 
 ## ⭐ **Se este projeto foi útil, considere dar uma estrela!**
 
-[![GitHub stars](https://img.shields.io/github/stars/seu-usuario/habit-tracker-api.svg?style=social&label=Star)](https://github.com/jeffymesquita/habit-tracker-api)
+[![GitHub stars](https://img.shields.io/github/stars/jeffymesquita/habit-tracker-api.svg?style=social&label=Star)](https://github.com/jeffymesquita/habit-tracker-api)
 
 ---
 
