@@ -1,11 +1,17 @@
-import { Body, Controller, Get, Post, Req, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { Body, Controller, Get, Post, Put, Req, Query } from '@nestjs/common';
+import {
+	ApiBearerAuth,
+	ApiTags,
+	ApiQuery,
+	ApiOperation,
+	ApiResponse,
+} from '@nestjs/swagger';
 import { Auth } from '@/guards/useAuth';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { UserLoginDTO } from './dtos/UserLogin.dto';
 import { UserService } from './user.service';
 import { FilterEmailDTO } from './dtos/FilterEmail.dto';
-// import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
+import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @ApiTags('Authentications')
 @Controller('/app/user')
@@ -86,9 +92,26 @@ export class UserController {
 		return this.userService.emailAvailable(email);
 	}
 
-	// @ApiBearerAuth()
-	// @Patch('/profile/:id')
-	// async updateProfile(@Req() req: Request, @Body() body: UpdateProfileDTO) {
-	// 	return this.userService.updateProfile(req, body);
-	// }
+	@ApiBearerAuth()
+	@Auth()
+	@Put('/profile')
+	@ApiOperation({
+		summary: 'Atualizar perfil do usuário',
+		description: 'Atualiza as informações do perfil do usuário autenticado',
+	})
+	@ApiResponse({
+		status: 200,
+		description: 'Perfil atualizado com sucesso',
+	})
+	@ApiResponse({
+		status: 404,
+		description: 'Perfil não encontrado',
+	})
+	@ApiResponse({
+		status: 401,
+		description: 'Token inválido ou ausente',
+	})
+	async updateProfile(@Req() req: Request, @Body() body: UpdateProfileDTO) {
+		return this.userService.updateProfile(req, body);
+	}
 }

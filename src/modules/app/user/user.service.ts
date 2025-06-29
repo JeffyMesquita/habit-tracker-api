@@ -16,6 +16,7 @@ import * as jwt from 'jsonwebtoken';
 import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { JwtPayload } from '@/@types/JwtPayload';
 import { FilterEmailDTO } from './dtos/FilterEmail.dto';
+import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
 
 @Injectable()
 export class UserService {
@@ -668,5 +669,64 @@ export class UserService {
 		};
 	}
 
-	// async updateProfile(req: Request, body: UpdateProfileDTO) {}
+	async updateProfile(req: Request, body: UpdateProfileDTO) {
+		const token = req.headers['authorization'] as string;
+
+		if (!token) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const userToken = token.split(' ')[1];
+
+		const decoded: JwtPayload = jwt.verify(
+			userToken,
+			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+		) as JwtPayload;
+
+		if (!decoded || !decoded.userId) {
+			throw new BadRequestException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const existingProfile = await this.prisma.profile.findFirst({
+			where: {
+				userId: decoded.userId as string,
+			},
+		});
+
+		if (!existingProfile) {
+			throw new BadRequestException({
+				message: 'Perfil não encontrado!',
+				code: API_CODES.error.PROFILE_NOT_FOUND,
+			});
+		}
+
+		const updatedProfile = await this.prisma.profile.update({
+			where: {
+				id: existingProfile.id,
+			},
+			data: {
+				firstName: body.firstName,
+				lastName: body.lastName,
+				avatarUrl: body.avatarUrl,
+				bio: body.bio,
+				occupation: body.occupation,
+				birthdate: body.birthdate ? new Date(body.birthdate) : null,
+				updatedAt: new Date(),
+			},
+		});
+
+		return {
+			message: 'Perfil atualizado com sucesso!',
+			code: API_CODES.success.PROFILE_UPDATED_SUCCESSFULLY,
+			data: {
+				profile: updatedProfile,
+			},
+		};
+	}
 }
