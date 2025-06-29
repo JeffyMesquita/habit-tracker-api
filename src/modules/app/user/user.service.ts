@@ -17,8 +17,6 @@ import { CreateAccountDTO } from './dtos/CreateAccount.dto';
 import { JwtPayload } from '@/@types/JwtPayload';
 import { FilterEmailDTO } from './dtos/FilterEmail.dto';
 
-// import { UpdateProfileDTO } from './dtos/UpdateProfile.dto';
-
 @Injectable()
 export class UserService {
 	constructor(

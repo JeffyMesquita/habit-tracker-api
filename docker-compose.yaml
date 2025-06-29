@@ -1,21 +1,47 @@
-version: '3'
-
 services:
   app:
     build: .
     ports:
-      - 3000:3000
+      - '3000:3000'
     volumes:
       - .:/home/node/app
-
-  db:
-    image: postgres:9.6
-    ports:
-      - 5432:5432
+      - /home/node/app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/habit-tracker-db
     env_file:
       - .env
-    network_mode: 'host'
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    command: ['npm', 'run', 'start:dev']
+    networks:
+      - habit-tracker-network
+
+  db:
+    image: postgres:15-alpine
+    ports:
+      - '5432:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: habit-tracker-db
+      PGDATA: /data/postgres
+    volumes:
+      - postgres_data:/data/postgres
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - habit-tracker-network
+
+volumes:
+  postgres_data:
+
+networks:
+  habit-tracker-network:
+    driver: bridge

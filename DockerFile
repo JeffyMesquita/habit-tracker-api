@@ -1,5 +1,8 @@
 FROM node:19-slim
-
 WORKDIR /home/node/app
-
-CMD ["tail", "-f", "/dev/null"]
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npx prisma generate
+EXPOSE 3000
+CMD ["npm", "run", "start:dev"]
