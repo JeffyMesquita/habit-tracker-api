@@ -399,9 +399,12 @@ Este projeto está licenciado sob a **MIT License** - veja o arquivo [LICENSE](L
 
 ## 👨‍💻 **Desenvolvedor**
 
-**Jeferson Mesquita(Jeffy)** \n
-📧 Email: je_2742@hotmail.com \n
-💼 LinkedIn: [linkedin.com/in/jeffymesquita](https://linkedin.com/in/jeffymesquita) \n
+**Jeferson Mesquita(Jeffy)**
+
+📧 Email: je_2742@hotmail.com
+
+💼 LinkedIn: [linkedin.com/in/jeffymesquita](https://linkedin.com/in/jeffymesquita)
+
 🐙 GitHub: [github.com/jeffymesquita](https://github.com/jeffymesquita) \n
 
 ---
