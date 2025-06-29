@@ -1,18 +1,17 @@
 import { PrismaService } from '@/database/prisma.service';
 import API_CODES from '@/misc/API/codes';
+import { AchievementsService } from '@/modules/app/achievements/achievements.service';
+import { GoalsService } from '@/modules/app/goals/goals.service';
 import {
 	BadRequestException,
 	Injectable,
 	NotFoundException,
-	ConflictException,
 } from '@nestjs/common';
 import dayjs from 'dayjs';
 import { CreateHabitDTO } from './dtos/CreateHabit.dto';
-import { UpdateHabitDTO } from './dtos/UpdateHabit.dto';
-import { RecordProgressDTO } from './dtos/RecordProgress.dto';
 import { FilterHabitsDTO, HabitFilterPeriod } from './dtos/FilterHabits.dto';
-import { AchievementsService } from '@/modules/app/achievements/achievements.service';
-import { GoalsService } from '@/modules/app/goals/goals.service';
+import { RecordProgressDTO } from './dtos/RecordProgress.dto';
+import { UpdateHabitDTO } from './dtos/UpdateHabit.dto';
 
 @Injectable()
 export class HabitsService {

@@ -1,15 +1,15 @@
+import { PrismaService } from '@/database/prisma.service';
+import API_CODES from '@/misc/API/codes';
+import { AchievementsService } from '@/modules/app/achievements/achievements.service';
+import { CreateGoalDTO } from '@/modules/app/goals/dtos/CreateGoal.dto';
+import { FilterGoalsDTO } from '@/modules/app/goals/dtos/FilterGoals.dto';
+import { UpdateGoalDTO } from '@/modules/app/goals/dtos/UpdateGoal.dto';
 import {
-	Injectable,
-	NotFoundException,
 	BadRequestException,
 	ConflictException,
+	Injectable,
+	NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '@/database/prisma.service';
-import { CreateGoalDTO } from '@/modules/app/goals/dtos/CreateGoal.dto';
-import { UpdateGoalDTO } from '@/modules/app/goals/dtos/UpdateGoal.dto';
-import { FilterGoalsDTO } from '@/modules/app/goals/dtos/FilterGoals.dto';
-import { AchievementsService } from '@/modules/app/achievements/achievements.service';
-import API_CODES from '@/misc/API/codes';
 import dayjs from 'dayjs';
 
 export interface GoalProgress {
@@ -360,8 +360,10 @@ export class GoalsService {
 		// Calculate progress percentage
 		const progress = Math.min((currentValue / goal.targetValue) * 100, 100);
 
-		// Check if completed
-		if (currentValue >= goal.targetValue && status !== 'expired') {
+		// Check if goal was previously completed
+		if (goal.completedAt) {
+			status = 'completed';
+		} else if (currentValue >= goal.targetValue && status !== 'expired') {
 			status = 'completed';
 		}
 
@@ -375,7 +377,8 @@ export class GoalsService {
 			progress: Math.round(progress * 100) / 100, // Round to 2 decimal places
 			status,
 			daysRemaining,
-			completionDate: status === 'completed' ? new Date() : undefined,
+			completionDate:
+				goal.completedAt || (status === 'completed' ? new Date() : undefined),
 		};
 	}
 
@@ -511,42 +514,110 @@ export class GoalsService {
 				where: {
 					userId,
 					endDate: { gte: new Date() }, // Only active goals
+					completedAt: null, // Only goals that haven't been completed yet
 					...(habitId && { habitId }), // Specific habit if provided
 				},
 			});
+
+			console.log(
+				`Checking ${activeGoals.length} active goals for user ${userId}${habitId ? ` and habit ${habitId}` : ''}`,
+			);
+
+			let completedGoalsCount = 0;
 
 			for (const goal of activeGoals) {
 				const progress = await this.calculateGoalProgress(userId, goal);
 
 				// Check if goal was just completed
-				if (progress.status === 'completed') {
-					// Check if this completion is new (not already marked as completed)
-					const wasAlreadyCompleted = await this.checkIfGoalWasCompleted(
-						goal.id,
-					);
+				if (
+					progress.status === 'completed' &&
+					progress.currentValue >= goal.targetValue
+				) {
+					// Mark as completed and trigger achievement
+					await this.markGoalAsCompleted(goal.id);
+					await this.achievementsService.handleGoalCompletion(userId, goal.id);
 
-					if (!wasAlreadyCompleted) {
-						// Mark as completed and trigger achievement
-						await this.markGoalAsCompleted(goal.id);
-						await this.achievementsService.handleGoalCompletion(
-							userId,
-							goal.id,
-						);
-					}
+					completedGoalsCount++;
+					console.log(
+						`✅ Goal "${goal.goalType}" completed! Progress: ${progress.currentValue}/${goal.targetValue}`,
+					);
 				}
 			}
+
+			if (completedGoalsCount > 0) {
+				console.log(
+					`🎉 ${completedGoalsCount} goal(s) completed for user ${userId}`,
+				);
+			}
+
+			return completedGoalsCount;
 		} catch (error) {
 			console.error('Error checking goal completions:', error);
+			return 0;
 		}
 	}
 
-	private async checkIfGoalWasCompleted(_goalId: string): Promise<boolean> {
-		// For simplicity, always check for completion
-		return false;
+	// Public method to manually mark a goal as completed (for admin or special cases)
+	async completeGoal(userId: string, goalId: string) {
+		const goal = await this.prismaService.userGoals.findFirst({
+			where: { id: goalId, userId },
+		});
+
+		if (!goal) {
+			throw new NotFoundException(API_CODES.error.GOAL_NOT_FOUND);
+		}
+
+		if (goal.completedAt) {
+			throw new BadRequestException('Goal is already completed');
+		}
+
+		try {
+			await this.markGoalAsCompleted(goalId);
+			await this.achievementsService.handleGoalCompletion(userId, goalId);
+
+			return {
+				message: 'Goal marked as completed successfully',
+				data: {
+					goalId,
+					completedAt: new Date(),
+				},
+			};
+		} catch (error) {
+			throw new BadRequestException('Failed to mark goal as completed');
+		}
 	}
 
-	private async markGoalAsCompleted(_goalId: string) {
-		// Mark the goal as completed - simplified implementation
-		// In a full implementation, you might add a 'completedAt' timestamp field
+	private async checkIfGoalWasCompleted(goalId: string): Promise<boolean> {
+		try {
+			const goal = await this.prismaService.userGoals.findUnique({
+				where: { id: goalId },
+				select: { completedAt: true },
+			});
+
+			// Goal is considered completed if completedAt field is set
+			return goal?.completedAt !== null && goal?.completedAt !== undefined;
+		} catch (error) {
+			console.error('Error checking goal completion status:', error);
+			return false;
+		}
+	}
+
+	private async markGoalAsCompleted(goalId: string): Promise<void> {
+		try {
+			await this.prismaService.userGoals.update({
+				where: { id: goalId },
+				data: {
+					completedAt: new Date(),
+					updatedAt: new Date(),
+				},
+			});
+
+			console.log(
+				`Goal ${goalId} marked as completed at ${new Date().toISOString()}`,
+			);
+		} catch (error) {
+			console.error('Error marking goal as completed:', error);
+			throw error;
+		}
 	}
 }

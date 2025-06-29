@@ -307,4 +307,44 @@ export class GoalsController {
 	async getProgress(@Param('id') id: string, @Req() req: any) {
 		return this.goalsService.getProgress(req.user.userId, id);
 	}
+
+	@Post(':id/complete')
+	@ApiOperation({
+		summary: 'Mark goal as completed',
+		description:
+			'Manually mark a goal as completed (for admin or special cases)',
+	})
+	@ApiParam({ name: 'id', description: 'Goal ID' })
+	@ApiResponse({
+		status: 200,
+		description: 'Goal marked as completed successfully',
+		schema: {
+			type: 'object',
+			properties: {
+				message: {
+					type: 'string',
+					example: 'Goal marked as completed successfully',
+				},
+				data: {
+					type: 'object',
+					properties: {
+						goalId: { type: 'string', example: 'uuid' },
+						completedAt: {
+							type: 'string',
+							example: '2025-01-29T19:30:00.000Z',
+						},
+					},
+				},
+			},
+		},
+	})
+	@ApiResponse({
+		status: 400,
+		description: 'Goal is already completed or invalid',
+	})
+	@ApiResponse({ status: 401, description: 'Unauthorized' })
+	@ApiResponse({ status: 404, description: 'Goal not found' })
+	async completeGoal(@Param('id') id: string, @Req() req: any) {
+		return this.goalsService.completeGoal(req.user.userId, id);
+	}
 }
