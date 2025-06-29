@@ -77,7 +77,16 @@ describe('AchievementsService', () => {
 
 			expect(result).toEqual({
 				message: API_CODES.success.ACHIEVEMENT_UNLOCKED,
-				data: mockAchievement,
+				data: {
+					...mockAchievement,
+					metadata: {
+						title: 'Getting Started',
+						description: 'Created your first habit',
+						icon: '🌱',
+						points: 10,
+						rarity: 'common',
+					},
+				},
 			});
 		});
 

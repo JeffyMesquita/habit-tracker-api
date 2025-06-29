@@ -15,9 +15,6 @@ export interface AchievementData {
 	userId: string;
 	achievementType: string;
 	timestamp: Date;
-	details?: string;
-	habitId?: string;
-	goalId?: string;
 }
 
 export interface AchievementStats {
@@ -65,25 +62,27 @@ export class AchievementsService {
 					userId,
 					achievementType: data.achievementType,
 					timestamp: new Date(),
-					// Store additional data in details as JSON-like string
-					details: JSON.stringify({
-						description: data.details,
-						habitId: data.habitId,
-						goalId: data.goalId,
-					}),
 				},
 			});
 
-			// Log activity
+			// Log activity with details in the activity log
 			await this.logAchievementActivity(
 				userId,
 				data.achievementType,
 				achievement.id,
+				{
+					description: data.details,
+					habitId: data.habitId,
+					goalId: data.goalId,
+				},
 			);
 
 			return {
 				message: API_CODES.success.ACHIEVEMENT_UNLOCKED,
-				data: achievement,
+				data: {
+					...achievement,
+					metadata: this.getAchievementMetadata(achievement.achievementType),
+				},
 			};
 		} catch (error) {
 			throw new BadRequestException(API_CODES.error.ACHIEVEMENT_UNLOCK_FAILED);
@@ -120,18 +119,10 @@ export class AchievementsService {
 			take: filters.limit || 20,
 		});
 
-		// Parse details and enhance data
+		// Enhance achievements with metadata
 		const enhancedAchievements = achievements.map((achievement) => {
-			let parsedDetails = {};
-			try {
-				parsedDetails = JSON.parse(achievement.details || '{}');
-			} catch {
-				parsedDetails = { description: achievement.details };
-			}
-
 			return {
 				...achievement,
-				...parsedDetails,
 				metadata: this.getAchievementMetadata(achievement.achievementType),
 			};
 		});
@@ -156,17 +147,9 @@ export class AchievementsService {
 			throw new NotFoundException(API_CODES.error.ACHIEVEMENT_NOT_FOUND);
 		}
 
-		// Parse details and enhance data
-		let parsedDetails = {};
-		try {
-			parsedDetails = JSON.parse(achievement.details || '{}');
-		} catch {
-			parsedDetails = { description: achievement.details };
-		}
-
+		// Enhance achievement with metadata
 		const enhancedAchievement = {
 			...achievement,
-			...parsedDetails,
 			metadata: this.getAchievementMetadata(achievement.achievementType),
 		};
 
@@ -233,9 +216,7 @@ export class AchievementsService {
 				break;
 
 			case 'habit_progress':
-				achievements.push(
-					...(await this.checkProgressAchievements(userId, data)),
-				);
+				achievements.push(...(await this.checkProgressAchievements(userId)));
 				break;
 
 			case 'streak_achieved':
@@ -253,7 +234,7 @@ export class AchievementsService {
 		for (const achievement of achievements) {
 			try {
 				await this.unlock(userId, achievement);
-			} catch (error) {
+			} catch {
 				// Achievement might already be unlocked, continue
 			}
 		}
@@ -261,7 +242,7 @@ export class AchievementsService {
 		return achievements;
 	}
 
-	// New method for automatic integration with habits
+	// Integration methods for automatic achievement unlocking
 	async handleProgressUpdate(
 		userId: string,
 		habitId: string,
@@ -489,7 +470,7 @@ export class AchievementsService {
 		return achievements;
 	}
 
-	private async checkProgressAchievements(userId: string, _data: any) {
+	private async checkProgressAchievements(userId: string) {
 		const completedCount = await this.prismaService.dailyHabitProgress.count({
 			where: { userId },
 		});
@@ -658,6 +639,7 @@ export class AchievementsService {
 		userId: string,
 		achievementType: string,
 		achievementId: string,
+		additionalData?: any,
 	) {
 		await this.prismaService.userActivityLog.create({
 			data: {
@@ -667,6 +649,7 @@ export class AchievementsService {
 				details: JSON.stringify({
 					achievementType,
 					achievementId,
+					...additionalData,
 				}),
 			},
 		});
