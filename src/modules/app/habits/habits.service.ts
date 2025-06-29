@@ -4,16 +4,23 @@ import {
 	BadRequestException,
 	Injectable,
 	NotFoundException,
+	ConflictException,
 } from '@nestjs/common';
 import dayjs from 'dayjs';
 import { CreateHabitDTO } from './dtos/CreateHabit.dto';
 import { UpdateHabitDTO } from './dtos/UpdateHabit.dto';
 import { RecordProgressDTO } from './dtos/RecordProgress.dto';
 import { FilterHabitsDTO, HabitFilterPeriod } from './dtos/FilterHabits.dto';
+import { AchievementsService } from '@/modules/app/achievements/achievements.service';
+import { GoalsService } from '@/modules/app/goals/goals.service';
 
 @Injectable()
 export class HabitsService {
-	constructor(private prisma: PrismaService) {}
+	constructor(
+		private prisma: PrismaService,
+		private achievementsService: AchievementsService,
+		private goalsService: GoalsService,
+	) {}
 
 	async createHabit(userId: string, createHabitDto: CreateHabitDTO) {
 		const { title, frequency = 1, weekDays, moment } = createHabitDto;
@@ -57,6 +64,9 @@ export class HabitsService {
 
 			return habit;
 		});
+
+		// Integrar com achievements na criação de hábito
+		await this.achievementsService.handleHabitCreation(userId, result.id);
 
 		return {
 			message: 'Hábito criado com sucesso!',
@@ -363,6 +373,16 @@ export class HabitsService {
 				},
 			});
 		}
+
+		// Integrar com achievements
+		await this.achievementsService.handleProgressUpdate(
+			userId,
+			habitId,
+			completedCount,
+		);
+
+		// Verificar se alguma meta foi completada
+		await this.goalsService.checkGoalCompletions(userId, habitId);
 
 		return {
 			message: 'Progresso registrado com sucesso!',

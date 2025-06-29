@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { HabitsService } from '@/modules/app/habits/habits.service';
 import { PrismaService } from '@/database/prisma.service';
+import { AchievementsService } from '@/modules/app/achievements/achievements.service';
+import { GoalsService } from '@/modules/app/goals/goals.service';
 import { CreateHabitDTO } from '@/modules/app/habits/dtos/CreateHabit.dto';
 import { RecordProgressDTO } from '@/modules/app/habits/dtos/RecordProgress.dto';
 import API_CODES from '@/misc/API/codes';
@@ -35,6 +37,25 @@ describe('HabitsService', () => {
 		$transaction: vi.fn(),
 	};
 
+	const mockAchievementsService = {
+		handleHabitCreation: vi.fn(),
+		handleProgressUpdate: vi.fn(),
+		unlockAchievement: vi.fn(),
+		getUserAchievements: vi.fn(),
+		getAchievementStats: vi.fn(),
+		getAchievementById: vi.fn(),
+	};
+
+	const mockGoalsService = {
+		checkGoalCompletions: vi.fn(),
+		create: vi.fn(),
+		findAll: vi.fn(),
+		findOne: vi.fn(),
+		update: vi.fn(),
+		remove: vi.fn(),
+		getProgress: vi.fn(),
+	};
+
 	beforeEach(async () => {
 		const module: TestingModule = await Test.createTestingModule({
 			providers: [
@@ -42,6 +63,14 @@ describe('HabitsService', () => {
 				{
 					provide: PrismaService,
 					useValue: mockPrismaService,
+				},
+				{
+					provide: AchievementsService,
+					useValue: mockAchievementsService,
+				},
+				{
+					provide: GoalsService,
+					useValue: mockGoalsService,
 				},
 			],
 		}).compile();

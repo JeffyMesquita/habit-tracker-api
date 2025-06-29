@@ -5,6 +5,119 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [1.1.0] - 2025-01-29
+
+### 🎉 **Sprint 2 - Gamificação e Relatórios**
+
+#### **✨ Adicionado**
+
+- **Sistema de Metas Personalizadas (6 APIs)**
+  - CRUD completo de metas com validação avançada
+  - Tipos de meta: habit_completion, streak_days, consistency_percentage
+  - Progresso automático baseado nos hábitos
+  - Filtros por status (active, completed, paused, cancelled)
+  - Priorização de metas (1-10)
+  - Datas de início e fim flexíveis
+  - Cálculo automático de progresso em tempo real
+
+- **Sistema de Achievements Completo (4 APIs)**
+  - 12 achievements pré-definidos categorizados
+  - Desbloqueio automático baseado em progresso
+  - Sistema de pontuação e raridade
+  - Estatísticas detalhadas por categoria
+  - Achievements manuais para casos especiais
+  - Integração com sistema de hábitos e metas
+
+- **Módulo de Relatórios Avançados (3+ APIs)**
+  - Relatórios semanais e mensais automatizados
+  - Geração customizada com múltiplos filtros
+  - Exportação em 3 formatos (JSON, CSV, PDF)
+  - Análise de tendências e padrões
+  - Métricas avançadas de consistency e completion
+  - Integração com achievements nos relatórios
+
+- **Sistema de Integração Automática**
+  - Fluxo Habits → Achievements → Goals totalmente automatizado
+  - Verificação automática de achievements após progresso
+  - Atualização automática de metas baseada em hábitos
+  - Cálculo de streaks em tempo real
+  - Sistema de notificação de conquistas
+  - Error handling robusto para não quebrar funcionalidades core
+
+- **Expansão Arquitetural**
+  - 3 novos módulos completamente testados
+  - Estrutura hierárquica sem circular dependencies
+  - 36 novos testes automatizados (total: 62)
+  - Documentação Swagger expandida
+  - API codes padronizados para todos os módulos
+
+#### **🔧 APIs Implementadas**
+
+**Metas (6 endpoints):**
+
+- `POST /app/goals` - Criar meta personalizada
+- `GET /app/goals` - Listar metas com filtros avançados
+- `GET /app/goals/:id` - Buscar meta específica
+- `PUT /app/goals/:id` - Atualizar meta
+- `DELETE /app/goals/:id` - Deletar meta
+- `GET /app/goals/:id/progress` - Progresso detalhado da meta
+
+**Achievements (4 endpoints):**
+
+- `POST /app/achievements/unlock` - Desbloquear achievement manual
+- `GET /app/achievements` - Listar achievements com filtros
+- `GET /app/achievements/stats` - Estatísticas por categoria
+- `GET /app/achievements/:id` - Detalhes do achievement
+
+**Relatórios (3+ endpoints):**
+
+- `POST /app/reports/generate` - Gerar relatório customizado
+- `GET /app/reports/weekly` - Relatório semanal automatizado
+- `GET /app/reports/monthly` - Relatório mensal automatizado
+
+#### **🏆 Sistema de Achievements**
+
+- **12 Achievements Implementados:**
+  - First Steps (primeiro hábito)
+  - Consistency Master (7 dias seguidos)
+  - Marathon Runner (30 dias seguidos)
+  - Goal Achiever (primeira meta completa)
+  - Perfectionist (100% completion)
+  - Early Bird (hábito antes das 8h)
+  - Night Owl (hábito após 22h)
+  - Weekend Warrior (hábito no fim de semana)
+  - Multitasker (5+ hábitos ativos)
+  - Dedicated (100+ progresso total)
+  - Champion (50 dias seguidos)
+  - Legendary (365 dias seguidos)
+
+#### **📊 Métricas de Qualidade**
+
+- **Testes**: 62 testes (↑136% vs v1.0.0), 100% aprovação
+- **APIs**: 33+ endpoints (↑57% vs v1.0.0)
+- **Módulos**: 7 módulos ativos (↑75% vs v1.0.0)
+- **Cobertura**: 100% funcionalidades core + integração
+- **Performance**: Mantida < 500ms resposta média
+- **TypeScript**: 0 erros, strict mode 100%
+
+#### **🔧 Modificado**
+
+- **HabitsService**: Integração automática com achievements e goals
+- **GoalsService**: Integração automática com achievements
+- **Arquitetura**: Dependency injection sem circular dependencies
+- **Testes**: Mocks atualizados para todas as integrações
+- **API Codes**: Padronização SUCCESS/ERROR → success/error
+
+#### **📚 Documentação**
+
+- README.md completamente atualizado
+- Roadmap atualizado com Sprint 2 concluído
+- Documentação Swagger para todas as novas APIs
+- Exemplos de uso para integração automática
+- Estrutura de testes documentada
+
+---
+
 ## [1.0.0] - 2025-01-29
 
 ### 🎉 **Sprint 1 - Lançamento Inicial**

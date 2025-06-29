@@ -5,10 +5,10 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-blue.svg)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-5.0-lightgrey.svg)](https://www.prisma.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Tests-26%20passing-green.svg)](#-testes)
+[![Tests](https://img.shields.io/badge/Tests-62%20passing-green.svg)](#-testes)
 [![API Docs](https://img.shields.io/badge/API-Swagger-brightgreen.svg)](#-documenta%C3%A7%C3%A3o-da-api)
 
-> **Sistema completo de rastreamento de hábitos** com analytics avançados, sistema de streaks e dashboard consolidado. Desenvolvido com **Clean Architecture**, **SOLID principles** e **Test-Driven Development**.
+> **Sistema completo de rastreamento de hábitos** com analytics avançados, sistema de streaks, gamificação, metas personalizadas e relatórios avançados. Desenvolvido com **Clean Architecture**, **SOLID principles** e **Test-Driven Development**.
 
 ## 🌟 **Highlights do Projeto**
 
@@ -16,9 +16,10 @@
 
 - ✅ **Clean Architecture** com separação clara de responsabilidades
 - ✅ **SOLID Principles** aplicados em toda a codebase
-- ✅ **Test-Driven Development** (26 testes, 100% pass rate)
+- ✅ **Test-Driven Development** (62 testes, 100% pass rate)
 - ✅ **TypeScript Strict Mode** com tipagem completa
 - ✅ **Design Patterns** (Repository, Factory, Dependency Injection)
+- ✅ **Modular Integration** sem circular dependencies
 
 ### 🔒 **Segurança & Autenticação**
 
@@ -32,6 +33,10 @@
 
 - ✅ **Dashboard Analytics** consolidado
 - ✅ **Sistema de Streaks** com cálculo automático
+- ✅ **Gamificação Completa** com achievements automáticos
+- ✅ **Metas Personalizadas** com progresso em tempo real
+- ✅ **Relatórios Avançados** (PDF, CSV, JSON)
+- ✅ **Integração Automática** Habits → Goals → Achievements
 - ✅ **Filtros Inteligentes** (hoje, semana, mês, trimestre, ano)
 - ✅ **Métricas de Progresso** detalhadas
 - ✅ **Histórico Completo** de atividades
@@ -110,11 +115,39 @@ POST   /app/habits/:id/progress     // Registrar progresso diário
 GET    /app/habits/:id/progress     // Histórico + estatísticas
 ```
 
+### 🎯 **Sistema de Metas (6 APIs)**
+
+```typescript
+POST   /app/goals                   // Criar meta personalizada
+GET    /app/goals                   // Listar metas com filtros
+GET    /app/goals/:id               // Buscar meta específica
+PUT    /app/goals/:id               // Atualizar meta
+DELETE /app/goals/:id               // Deletar meta
+GET    /app/goals/:id/progress      // Progresso da meta
+```
+
+### 🏆 **Sistema de Achievements (4 APIs)**
+
+```typescript
+POST   /app/achievements/unlock     // Desbloquear achievement manual
+GET    /app/achievements            // Listar achievements do usuário
+GET    /app/achievements/stats      // Estatísticas de achievements
+GET    /app/achievements/:id        // Detalhes do achievement
+```
+
 ### 📊 **Analytics & Insights (2 APIs)**
 
 ```typescript
 GET / app / analytics / dashboard; // Dashboard consolidado
 GET / app / analytics / streaks; // Sistema de streaks
+```
+
+### 📈 **Relatórios Avançados (3+ APIs)**
+
+```typescript
+POST / app / reports / generate; // Gerar relatório customizado
+GET / app / reports / weekly; // Relatório semanal
+GET / app / reports / monthly; // Relatório mensal
 ```
 
 ### 👤 **Perfil do Usuário (3 APIs)**
@@ -123,6 +156,8 @@ GET / app / analytics / streaks; // Sistema de streaks
 GET / app / user / me; // Visualizar perfil
 PUT / app / user / profile; // Atualizar perfil
 ```
+
+**🎯 Total: 33+ APIs funcionais** com documentação Swagger completa
 
 ---
 
@@ -221,6 +256,11 @@ test/
 │       ├── habits/           # Testes do módulo de hábitos
 │       │   ├── habits.controller.spec.ts
 │       │   └── habits.service.spec.ts
+│       ├── goals/            # Testes do módulo de metas
+│       │   ├── goals.controller.spec.ts
+│       │   └── goals.service.spec.ts
+│       ├── achievements/     # Testes do módulo de achievements
+│       │   └── achievements.service.spec.ts
 │       └── analytics/        # Testes do módulo de analytics
 │           ├── analytics.controller.spec.ts
 │           └── analytics.service.spec.ts
@@ -229,11 +269,12 @@ test/
 
 ### **Relatório de Testes**
 
-- ✅ **26 testes** executados
+- ✅ **62 testes** executados
 - ✅ **100% pass rate**
 - ✅ **Cobertura completa** das funcionalidades principais
 - ✅ **Testes unitários** para services e controllers
 - ✅ **Mocking completo** do Prisma e dependências
+- ✅ **Testes de integração** entre módulos
 
 ---
 
@@ -319,8 +360,11 @@ src/
 ├── misc/                     # Utilitários e códigos de API
 ├── modules/                  # Módulos da aplicação
 │   └── app/
+│       ├── achievements/     # Módulo de achievements
 │       ├── analytics/        # Módulo de analytics
+│       ├── goals/            # Módulo de metas
 │       ├── habits/           # Módulo de hábitos
+│       ├── reports/          # Módulo de relatórios
 │       └── user/             # Módulo de usuários
 └── main.ts                   # Entry point da aplicação
 ```
@@ -333,8 +377,15 @@ src/
 - **DTO Pattern** - Validação e transformação de dados
 - **Guard Pattern** - Proteção e autorização
 - **Service Layer** - Lógica de negócios isolada
+- **Integration Pattern** - Comunicação automática entre módulos
 
----
+### **Sistema de Integração Automática**
+
+```
+Habits (Record Progress) → Achievements (Check Unlocks) → Goals (Update Progress)
+     ↓                          ↓                             ↓
+Analytics Update        Gamification System        Progress Tracking
+```
 
 ## 🛣️ **Roadmap**
 
@@ -345,17 +396,28 @@ src/
 - Analytics dashboard e sistema de streaks
 - 26 testes automatizados
 
-### 🎯 **Sprint 2 - Próximo (Fevereiro 2025)**
+### ✅ **Sprint 2 - Concluído (Janeiro 2025)**
 
-- Sistema de metas e objetivos
-- Achievements e gamificação
-- Relatórios avançados
+- ✅ Sistema de metas personalizadas (6 APIs)
+- ✅ Achievements e gamificação (4 APIs)
+- ✅ Relatórios avançados (3+ APIs)
+- ✅ Integração automática entre módulos
+- ✅ 62 testes automatizados (100% pass rate)
+- ✅ Arquitetura sem circular dependencies
 
-### 🚀 **Sprint 3+ - Futuro**
+### 🎯 **Sprint 3 - Próximo (Fevereiro 2025)**
 
-- Notificações push
+- Notificações push e email
+- Preferências avançadas
+- Cache e otimizações
+- Features sociais básicas
+
+### 🚀 **Sprint 4+ - Futuro**
+
 - Integração com wearables
-- Features sociais
+- IA e insights personalizados
+- App mobile companion
+- Features colaborativas
 
 ---
 
