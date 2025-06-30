@@ -457,10 +457,43 @@ export class FirebasePushProvider implements PushProvider {
 
 		result.responses.forEach((res, index) => {
 			if (!res.success && res.error) {
-				this.logger.warn(
-					`Failed to send to device at index ${index}:`,
-					res.error.message,
-				);
+				const errorCode = res.error.code;
+				const errorMessage = res.error.message || 'Unknown error';
+
+				// Log different error types according to Firebase documentation
+				switch (errorCode) {
+					case 'messaging/invalid-registration-token':
+					case 'messaging/registration-token-not-registered':
+						this.logger.warn(
+							`Invalid/Unregistered token at index ${index}: ${errorMessage}`,
+						);
+						// Token should be removed from database
+						break;
+					case 'messaging/message-rate-exceeded':
+					case 'messaging/device-message-rate-exceeded':
+						this.logger.warn(
+							`Rate limit exceeded for device at index ${index}: ${errorMessage}`,
+						);
+						// Should implement retry with exponential backoff
+						break;
+					case 'messaging/invalid-argument':
+						this.logger.error(
+							`Invalid message format at index ${index}: ${errorMessage}`,
+						);
+						// Should not retry these errors
+						break;
+					case 'messaging/server-unavailable':
+					case 'messaging/internal-error':
+						this.logger.warn(
+							`Server error at index ${index}: ${errorMessage} - Will retry`,
+						);
+						// Should retry with exponential backoff
+						break;
+					default:
+						this.logger.warn(
+							`Failed to send to device at index ${index}: ${errorCode} - ${errorMessage}`,
+						);
+				}
 			}
 		});
 

@@ -5,7 +5,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0-blue.svg)](https://www.postgresql.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-5.0-lightgrey.svg)](https://www.prisma.io/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://www.docker.com/)
-[![Tests](https://img.shields.io/badge/Tests-62%20passing-green.svg)](#-testes)
+[![Tests](https://img.shields.io/badge/Tests-70%20passing-green.svg)](#-testes)
 [![API Docs](https://img.shields.io/badge/API-Swagger-brightgreen.svg)](#-documenta%C3%A7%C3%A3o-da-api)
 
 > **Sistema completo de rastreamento de hábitos** com analytics avançados, sistema de streaks, gamificação, metas personalizadas e relatórios avançados. Desenvolvido com **Clean Architecture**, **SOLID principles** e **Test-Driven Development**.
@@ -16,7 +16,7 @@
 
 - ✅ **Clean Architecture** com separação clara de responsabilidades
 - ✅ **SOLID Principles** aplicados em toda a codebase
-- ✅ **Test-Driven Development** (62 testes, 100% pass rate)
+- ✅ **Test-Driven Development** (70 testes, 100% pass rate)
 - ✅ **TypeScript Strict Mode** com tipagem completa
 - ✅ **Design Patterns** (Repository, Factory, Dependency Injection)
 - ✅ **Modular Integration** sem circular dependencies
@@ -150,6 +150,32 @@ GET / app / reports / weekly; // Relatório semanal
 GET / app / reports / monthly; // Relatório mensal
 ```
 
+### 📱 **Sistema de Notificações (6+ APIs)**
+
+```typescript
+POST / app / notifications / email; // Enviar email específico
+POST / app / notifications / push; // Enviar push notification
+POST / app / notifications / devices / register; // Registrar dispositivo
+GET / app / notifications / health; // Status do sistema
+POST / app / notifications / test / email; // Testar envio de email
+POST / app / notifications / test / push; // Testar push notification
+```
+
+**🔥 Tipos de Notificações Implementadas:**
+
+- 🎯 **Habit Reminders** - Lembretes de hábitos personalizados
+- 🏆 **Achievement Unlocked** - Celebração de conquistas
+- ⚠️ **Streak Warning** - Alertas de risco de streak
+- 📊 **Weekly Reports** - Relatórios semanais automáticos
+- 😢 **Inactivity Alerts** - Re-engajamento de usuários inativos
+- ⏰ **Goal Deadlines** - Lembretes de prazo de metas
+
+**📱 Plataformas Suportadas:**
+
+- iOS (APNS via Firebase)
+- Android (FCM)
+- Web Push (WebPush)
+
 ### 👤 **Perfil do Usuário (3 APIs)**
 
 ```typescript
@@ -157,7 +183,7 @@ GET / app / user / me; // Visualizar perfil
 PUT / app / user / profile; // Atualizar perfil
 ```
 
-**🎯 Total: 33+ APIs funcionais** com documentação Swagger completa
+**🎯 Total: 39+ APIs funcionais** com documentação Swagger completa
 
 ---
 
@@ -269,7 +295,7 @@ test/
 
 ### **Relatório de Testes**
 
-- ✅ **62 testes** executados
+- ✅ **70 testes** executados
 - ✅ **100% pass rate**
 - ✅ **Cobertura completa** das funcionalidades principais
 - ✅ **Testes unitários** para services e controllers
@@ -284,6 +310,14 @@ test/
 
 Acesse a documentação interativa completa em:
 **http://localhost:3333/api**
+
+### **📱 Documentação de Push Notifications**
+
+Para documentação completa do sistema de notificações push, consulte:
+
+- 📖 **[Guia Completo](docs/modules/PUSH-NOTIFICATIONS-COMPLETE-GUIDE.md)** - Documentação técnica detalhada (800+ linhas)
+- ⚡ **[Referência Firebase](docs/modules/FIREBASE-REFERENCE.md)** - Quick reference e troubleshooting
+- 📚 **[Índice de Docs](docs/modules/NOTIFICATIONS-INDEX.md)** - Portal de entrada para toda documentação
 
 ### **Exemplo de Uso**
 
@@ -402,15 +436,19 @@ Analytics Update        Gamification System        Progress Tracking
 - ✅ Achievements e gamificação (4 APIs)
 - ✅ Relatórios avançados (3+ APIs)
 - ✅ Integração automática entre módulos
-- ✅ 62 testes automatizados (100% pass rate)
+- ✅ 70 testes automatizados (100% pass rate)
 - ✅ Arquitetura sem circular dependencies
 
-### 🎯 **Sprint 3 - Próximo (Fevereiro 2025)**
+### 🎯 **Sprint 3 - Concluído (Janeiro 2025)**
 
-- Notificações push e email
-- Preferências avançadas
-- Cache e otimizações
-- Features sociais básicas
+- ✅ **Sistema de Notificações Completo** (6+ APIs)
+- ✅ **Push Notifications Firebase FCM**
+- ✅ **Email Notifications com Resend**
+- ✅ **6 Tipos de Notificações** (Lembretes, Conquistas, Alertas, etc.)
+- ✅ **Multi-plataforma** (iOS/Android/Web)
+- ✅ **Validação Automática de Tokens**
+- ✅ **Logs e Monitoramento Completo**
+- ✅ **Documentação Técnica Completa** (40+ páginas)
 
 ### 🚀 **Sprint 4+ - Futuro**
 
