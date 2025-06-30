@@ -1,5 +1,4 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '@/modules/app/notifications/notifications.service';
 import { EmailService } from '@/modules/app/notifications/services/email.service';
 import { PushService } from '@/modules/app/notifications/services/push.service';
@@ -11,7 +10,6 @@ describe('NotificationsService', () => {
 	let service: NotificationsService;
 	let prismaService: PrismaService;
 	let emailService: EmailService;
-	let pushService: PushService;
 
 	beforeEach(async () => {
 		const mockEmailService = {
@@ -151,7 +149,6 @@ describe('NotificationsService', () => {
 		service = module.get<NotificationsService>(NotificationsService);
 		prismaService = module.get<PrismaService>(PrismaService);
 		emailService = module.get<EmailService>(EmailService);
-		pushService = module.get<PushService>(PushService);
 	});
 
 	afterEach(() => {

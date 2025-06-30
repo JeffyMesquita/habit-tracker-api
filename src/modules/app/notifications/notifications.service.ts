@@ -186,6 +186,14 @@ export class NotificationsService {
 
 			if (!devices.length) {
 				console.log('No active devices found for user:', userId);
+				// Update log to indicate no devices available
+				await this.prisma.notificationLog.update({
+					where: { id: logId },
+					data: {
+						status: 'failed',
+						errorMessage: 'No active devices found',
+					},
+				});
 				return false;
 			}
 
@@ -240,6 +248,17 @@ export class NotificationsService {
 					});
 			}
 
+			// Update notification log with push result
+			await this.prisma.notificationLog.update({
+				where: { id: logId },
+				data: {
+					status: pushResult.success ? 'sent' : 'failed',
+					deliveredAt: pushResult.success ? new Date() : null,
+					errorMessage: pushResult.error || null,
+					providerMessageId: pushResult.messageId || null,
+				},
+			});
+
 			// Log push notification result
 			console.log(
 				`Push notification sent: ${pushResult.success}, Success: ${pushResult.successCount}, Failed: ${pushResult.failureCount}`,
@@ -247,6 +266,15 @@ export class NotificationsService {
 
 			return pushResult.success;
 		} catch (error) {
+			// Update log with error
+			await this.prisma.notificationLog.update({
+				where: { id: logId },
+				data: {
+					status: 'failed',
+					errorMessage: error.message,
+				},
+			});
+
 			console.error('Push notification failed:', error);
 			return false;
 		}

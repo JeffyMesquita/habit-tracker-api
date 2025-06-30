@@ -6,7 +6,6 @@ import {
 	PushSendResult,
 	PushNotificationData,
 	PushOptions,
-	PushTarget,
 	DeviceTokenValidationResult,
 } from './push.provider.interface';
 
