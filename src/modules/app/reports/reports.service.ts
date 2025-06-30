@@ -123,7 +123,7 @@ export class ReportsService {
 				case ReportFormat.CSV:
 					return this.exportToCSV(reportData);
 				case ReportFormat.PDF:
-					return this.exportToPDF(reportData);
+					return this.exportToPDF();
 				default:
 					return this.exportToJSON(reportData);
 			}
@@ -144,11 +144,11 @@ export class ReportsService {
 			...(habitIds && habitIds.length > 0 ? { id: { in: habitIds } } : {}),
 		};
 
-		// Get habits data
+		// Get habits data with correct relations
 		const habits = await this.prisma.habit.findMany({
 			where: habitFilter,
 			include: {
-				dailyProgress: {
+				DailyHabitProgress: {
 					where: {
 						date: {
 							gte: period.startDate,
@@ -156,7 +156,7 @@ export class ReportsService {
 						},
 					},
 				},
-				streaks: {
+				HabitStreak: {
 					where: {
 						OR: [
 							{ endDate: null }, // Current streaks
@@ -174,20 +174,20 @@ export class ReportsService {
 
 		// Calculate habit metrics
 		const habitMetrics = habits.map((habit) => {
-			const progress = habit.dailyProgress;
-			const completed = progress.filter((p) => p.completed).length;
+			const progress = habit.DailyHabitProgress;
+			const completed = progress.filter((p) => p.completedCount > 0).length;
 			const total = progress.length;
 			const completionRate = total > 0 ? (completed / total) * 100 : 0;
 
 			return {
 				id: habit.id,
-				name: habit.name,
-				category: habit.category,
+				name: habit.title,
+				category: habit.category || 'Geral',
 				daysCompleted: completed,
 				totalDays: total,
 				completionRate: Math.round(completionRate * 100) / 100,
-				currentStreak: this.calculateCurrentStreak(habit.streaks),
-				longestStreak: this.calculateLongestStreak(habit.streaks),
+				currentStreak: this.calculateCurrentStreak(habit.HabitStreak),
+				longestStreak: this.calculateLongestStreak(habit.HabitStreak),
 			};
 		});
 
@@ -215,18 +215,23 @@ export class ReportsService {
 			habitIds,
 		);
 
+		// Category breakdown
+		const categoryBreakdown = this.calculateCategoryBreakdown(habitMetrics);
+
 		const result = {
 			summary: {
 				totalHabits,
 				totalCompletions,
 				overallCompletionRate: Math.round(overallCompletionRate * 100) / 100,
-				activeDays: this.calculateActiveDays(habits, period),
+				activeDays: this.calculateActiveDays(habits),
+				categoryBreakdown,
 			},
 			habits: habitMetrics,
 			insights: {
 				bestPerformingHabits: bestHabits,
 				needsAttentionHabits: worstHabits,
 				weeklyTrends,
+				topCategories: this.getTopCategories(categoryBreakdown),
 			},
 		};
 
@@ -296,25 +301,23 @@ export class ReportsService {
 
 	private calculateCurrentStreak(streaks: any[]): number {
 		const currentStreak = streaks.find((s) => s.endDate === null);
-		return currentStreak ? currentStreak.streakLength : 0;
+		return currentStreak ? currentStreak.streakLength || 0 : 0;
 	}
 
 	private calculateLongestStreak(streaks: any[]): number {
 		return streaks.reduce(
-			(max, streak) => Math.max(max, streak.streakLength),
+			(max, streak) => Math.max(max, streak.streakLength || 0),
 			0,
 		);
 	}
 
-	private calculateActiveDays(
-		habits: any[],
-		period: { startDate: Date; endDate: Date },
-	): number {
+	private calculateActiveDays(habits: any[]): number {
 		const activeDaysSet = new Set<string>();
 
 		habits.forEach((habit) => {
-			habit.dailyProgress.forEach((progress) => {
-				if (progress.completed) {
+			habit.DailyHabitProgress.forEach((progress) => {
+				if (progress.completedCount > 0) {
+					// Corrigido: usar completedCount
 					activeDaysSet.add(progress.date.toISOString().split('T')[0]);
 				}
 			});
@@ -342,7 +345,7 @@ export class ReportsService {
 
 			const weekCompletions = await this.prisma.dailyHabitProgress.count({
 				where: {
-					completed: true,
+					completedCount: { gt: 0 }, // Corrigido: usar completedCount > 0
 					date: { gte: weekStart, lte: weekEnd },
 					habit: {
 						userId,
@@ -437,12 +440,54 @@ export class ReportsService {
 		};
 	}
 
-	private exportToPDF(data: any) {
+	private exportToPDF() {
 		// Placeholder for PDF export - would need a PDF library like puppeteer
 		return {
 			format: 'pdf',
 			data: 'PDF export not implemented yet',
 			filename: `habit-report-${new Date().toISOString().split('T')[0]}.pdf`,
 		};
+	}
+
+	private calculateCategoryBreakdown(habitMetrics: any[]) {
+		const categoryStats = {};
+
+		habitMetrics.forEach((habit) => {
+			const category = habit.category;
+			if (!categoryStats[category]) {
+				categoryStats[category] = {
+					totalHabits: 0,
+					completedDays: 0,
+					totalDays: 0,
+					completionRate: 0,
+				};
+			}
+
+			categoryStats[category].totalHabits++;
+			categoryStats[category].completedDays += habit.daysCompleted;
+			categoryStats[category].totalDays += habit.totalDays;
+		});
+
+		// Calculate completion rates
+		Object.keys(categoryStats).forEach((category) => {
+			const stats = categoryStats[category];
+			stats.completionRate =
+				stats.totalDays > 0
+					? Math.round((stats.completedDays / stats.totalDays) * 10000) / 100
+					: 0;
+		});
+
+		return categoryStats;
+	}
+
+	private getTopCategories(categoryBreakdown: any) {
+		return Object.entries(categoryBreakdown)
+			.map(([category, stats]: [string, any]) => ({
+				category,
+				completionRate: stats.completionRate,
+				totalHabits: stats.totalHabits,
+			}))
+			.sort((a, b) => b.completionRate - a.completionRate)
+			.slice(0, 3);
 	}
 }

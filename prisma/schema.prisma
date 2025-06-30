@@ -136,6 +136,7 @@ model Address {
 model Habit {
   id        String    @id @default(uuid())
   title     String
+  category  String?
   frequency Int?
   moment    DateTime?
 
@@ -148,6 +149,7 @@ model Habit {
   user               User                 @relation(fields: [userId], references: [id])
   userId             String
   DailyHabitProgress DailyHabitProgress[]
+  HabitStreak        HabitStreak[]
 
   @@unique([userId, title])
   @@map("habits")
@@ -214,6 +216,8 @@ model HabitStreak {
   id        String   @id @default(uuid())
   user      User     @relation(fields: [userId], references: [id])
   userId    String
+  habit     Habit?   @relation(fields: [habitId], references: [id])
+  habitId   String?
   startDate DateTime
   endDate   DateTime
 
