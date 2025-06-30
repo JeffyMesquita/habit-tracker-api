@@ -1,8 +1,8 @@
 # 📧 **Sprint 3: Sistema de Notificações - Detalhamento Completo**
 
-> **Status**: 📋 Planning | **Duration**: 4 semanas | **Start**: Fev 2025 | **Team**: Backend + DevOps
-
----
+**Status:** ⚡ Em andamento - Step 2 (50% concluído)
+**Duração:** 4 semanas (Janeiro 2025)
+**Meta:** 8-10 novos endpoints + sistema completo email + push
 
 ## 🎯 **Objetivos do Sprint**
 

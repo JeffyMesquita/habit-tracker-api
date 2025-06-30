@@ -4,11 +4,15 @@ import {
 	NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
+import { EmailService } from './services/email.service';
 import API_CODES from '@/misc/API/codes';
 
 @Injectable()
 export class NotificationsService {
-	constructor(private readonly prisma: PrismaService) {}
+	constructor(
+		private readonly prisma: PrismaService,
+		private readonly emailService: EmailService,
+	) {}
 
 	async sendNotification(userId: string, type: string, data: any) {
 		try {
@@ -33,6 +37,10 @@ export class NotificationsService {
 				},
 			});
 
+			if (preferences.data.emailEnabled) {
+				await this.sendEmailNotification(userId, type, data, log.id);
+			}
+
 			return {
 				success: true,
 				message: 'Notificação enviada com sucesso',
@@ -45,6 +53,84 @@ export class NotificationsService {
 				code: API_CODES.error.NOTIFICATION_SEND_FAILED,
 				error: error.message,
 			});
+		}
+	}
+
+	private async sendEmailNotification(
+		userId: string,
+		type: string,
+		data: any,
+		logId: string,
+	) {
+		try {
+			const user = await this.prisma.user.findUnique({
+				where: { id: userId },
+				select: {
+					email: true,
+					profile: {
+						select: { firstName: true },
+					},
+				},
+			});
+
+			if (!user?.email) {
+				throw new Error('User email not found');
+			}
+
+			const emailData = {
+				...data,
+				userName: user.profile?.firstName || 'Usuário',
+				userEmail: user.email,
+			};
+
+			let emailResult;
+			switch (type) {
+				case 'habit_reminder':
+					emailResult = await this.emailService.sendHabitReminder(
+						user.email,
+						emailData,
+					);
+					break;
+				case 'achievement_unlocked':
+					emailResult = await this.emailService.sendAchievementUnlocked(
+						user.email,
+						emailData,
+					);
+					break;
+				case 'weekly_report':
+					emailResult = await this.emailService.sendWeeklyReport(
+						user.email,
+						emailData,
+					);
+					break;
+				default:
+					emailResult = await this.emailService.sendEmail({
+						to: user.email,
+						subject: data.title || 'Notificação do Habit Tracker',
+						template: 'habit-reminder',
+						data: emailData,
+					});
+			}
+
+			await this.prisma.notificationLog.update({
+				where: { id: logId },
+				data: {
+					status: emailResult.success ? 'sent' : 'failed',
+					deliveredAt: emailResult.success ? new Date() : null,
+					errorMessage: emailResult.error || null,
+					providerMessageId: emailResult.messageId || null,
+				},
+			});
+		} catch (error) {
+			await this.prisma.notificationLog.update({
+				where: { id: logId },
+				data: {
+					status: 'failed',
+					errorMessage: error.message,
+				},
+			});
+
+			console.error('Email notification failed:', error);
 		}
 	}
 
@@ -205,21 +291,49 @@ export class NotificationsService {
 
 	async sendTestNotification(userId: string, type: string) {
 		try {
-			const testData = {
-				title: '🧪 Notificação de Teste',
-				body: 'Esta é uma notificação de teste do sistema.',
-				habitTitle: 'Exercícios',
-				currentStreak: 5,
-				completionRate: 85,
-			};
+			const user = await this.prisma.user.findUnique({
+				where: { id: userId },
+				select: {
+					email: true,
+					profile: {
+						select: { firstName: true },
+					},
+				},
+			});
 
-			const result = await this.sendNotification(userId, type, testData);
+			if (!user?.email) {
+				throw new Error('User email not found');
+			}
+
+			const emailResult = await this.emailService.sendTestEmail(
+				user.email,
+				type,
+			);
+
+			const log = await this.prisma.notificationLog.create({
+				data: {
+					userId,
+					type: `test_${type}`,
+					channel: 'email',
+					status: emailResult.success ? 'sent' : 'failed',
+					title: '🧪 Notificação de Teste',
+					body: 'Esta é uma notificação de teste do sistema.',
+					deliveredAt: emailResult.success ? new Date() : null,
+					errorMessage: emailResult.error || null,
+					providerMessageId: emailResult.messageId || null,
+					createdAt: new Date(),
+				},
+			});
 
 			return {
 				success: true,
 				message: 'Notificação de teste enviada',
 				code: API_CODES.success.TEST_NOTIFICATION_SENT,
-				data: result,
+				data: {
+					notificationId: log.id,
+					emailDelivered: emailResult.success,
+					messageId: emailResult.messageId,
+				},
 			};
 		} catch (error) {
 			throw new BadRequestException({
@@ -242,5 +356,9 @@ export class NotificationsService {
 
 		const prefKey = typeMap[type];
 		return prefKey ? preferences[prefKey] : true;
+	}
+
+	isHealthy(): boolean {
+		return this.emailService.isHealthy();
 	}
 }
