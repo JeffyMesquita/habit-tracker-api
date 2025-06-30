@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { NotificationsService } from '@/modules/app/notifications/notifications.service';
 import { EmailService } from '@/modules/app/notifications/services/email.service';
+import { PushService } from '@/modules/app/notifications/services/push.service';
 import { PrismaService } from '@/database/prisma.service';
 import API_CODES from '@/misc/API/codes';
 import { vi } from 'vitest';
@@ -9,24 +11,80 @@ describe('NotificationsService', () => {
 	let service: NotificationsService;
 	let prismaService: PrismaService;
 	let emailService: EmailService;
+	let pushService: PushService;
 
 	beforeEach(async () => {
 		const mockEmailService = {
 			sendHabitReminder: vi
 				.fn()
-				.mockResolvedValue({ success: true, messageId: 'test-123' }),
+				.mockResolvedValue({ success: true, messageId: 'email-123' }),
 			sendAchievementUnlocked: vi
 				.fn()
-				.mockResolvedValue({ success: true, messageId: 'test-456' }),
+				.mockResolvedValue({ success: true, messageId: 'email-124' }),
 			sendWeeklyReport: vi
 				.fn()
-				.mockResolvedValue({ success: true, messageId: 'test-789' }),
+				.mockResolvedValue({ success: true, messageId: 'email-125' }),
 			sendEmail: vi
 				.fn()
-				.mockResolvedValue({ success: true, messageId: 'test-generic' }),
+				.mockResolvedValue({ success: true, messageId: 'email-126' }),
 			sendTestEmail: vi
 				.fn()
-				.mockResolvedValue({ success: true, messageId: 'test-email' }),
+				.mockResolvedValue({ success: true, messageId: 'test-email-123' }),
+			isHealthy: vi.fn().mockReturnValue(true),
+		};
+
+		const mockPushService = {
+			sendPushNotification: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendHabitReminder: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-habit-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendAchievementUnlocked: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-achievement-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendStreakWarning: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-streak-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendWeeklyReport: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-weekly-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendInactivityAlert: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-inactivity-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendGoalDeadline: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-goal-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			sendTestPush: vi.fn().mockResolvedValue({
+				success: true,
+				messageId: 'push-test-123',
+				successCount: 1,
+				failureCount: 0,
+			}),
+			validateDeviceToken: vi.fn().mockResolvedValue(true),
+			subscribeToTopic: vi.fn().mockResolvedValue({ success: true }),
+			unsubscribeFromTopic: vi.fn().mockResolvedValue({ success: true }),
 			isHealthy: vi.fn().mockReturnValue(true),
 		};
 
@@ -36,18 +94,39 @@ describe('NotificationsService', () => {
 				create: vi.fn(),
 				upsert: vi.fn(),
 			},
+			notificationLog: {
+				create: vi.fn().mockResolvedValue({
+					id: 'log-123',
+					userId: 'user-123',
+					type: 'test',
+					channel: 'email_push',
+					status: 'queued',
+					title: 'Test',
+					body: 'Test body',
+					createdAt: new Date(),
+				}),
+				update: vi.fn(),
+			},
 			userDevice: {
 				findFirst: vi.fn(),
+				findMany: vi
+					.fn()
+					.mockResolvedValue([
+						{ deviceToken: 'device-token-123' },
+						{ deviceToken: 'device-token-456' },
+					]),
 				create: vi.fn(),
 				update: vi.fn(),
 				delete: vi.fn(),
 			},
-			notificationLog: {
-				create: vi.fn(),
-				update: vi.fn(),
-			},
 			user: {
-				findUnique: vi.fn(),
+				findUnique: vi.fn().mockResolvedValue({
+					id: 'user-123',
+					email: 'test@example.com',
+					profile: {
+						firstName: 'Test User',
+					},
+				}),
 			},
 		};
 
@@ -62,12 +141,17 @@ describe('NotificationsService', () => {
 					provide: EmailService,
 					useValue: mockEmailService,
 				},
+				{
+					provide: PushService,
+					useValue: mockPushService,
+				},
 			],
 		}).compile();
 
 		service = module.get<NotificationsService>(NotificationsService);
 		prismaService = module.get<PrismaService>(PrismaService);
 		emailService = module.get<EmailService>(EmailService);
+		pushService = module.get<PushService>(PushService);
 	});
 
 	afterEach(() => {

@@ -51,6 +51,7 @@
 		"class-validator": "^0.14.1",
 		"date-fns": "^3.3.1",
 		"dayjs": "^1.11.10",
+		"firebase-admin": "^13.4.0",
 		"habit-tracker-api": "file:",
 		"handlebars": "^4.7.8",
 		"jsonwebtoken": "^9.0.2",

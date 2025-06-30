@@ -5,6 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { EmailService } from './services/email.service';
+import { PushService } from './services/push.service';
+import { PushNotificationType } from './providers/push/push.provider.interface';
 import API_CODES from '@/misc/API/codes';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class NotificationsService {
 	constructor(
 		private readonly prisma: PrismaService,
 		private readonly emailService: EmailService,
+		private readonly pushService: PushService,
 	) {}
 
 	async sendNotification(userId: string, type: string, data: any) {
@@ -29,7 +32,7 @@ export class NotificationsService {
 				data: {
 					userId,
 					type,
-					channel: 'email',
+					channel: 'email_push',
 					status: 'queued',
 					title: data.title || 'Notificação',
 					body: data.body || 'Nova notificação disponível',
@@ -37,15 +40,43 @@ export class NotificationsService {
 				},
 			});
 
+			let emailSent = false;
+			let pushSent = false;
+
+			// Send email notification
 			if (preferences.data.emailEnabled) {
-				await this.sendEmailNotification(userId, type, data, log.id);
+				emailSent = await this.sendEmailNotification(
+					userId,
+					type,
+					data,
+					log.id,
+				);
 			}
+
+			// Send push notification
+			if (preferences.data.pushEnabled) {
+				pushSent = await this.sendPushNotification(userId, type, data, log.id);
+			}
+
+			// Update log with final status
+			const finalStatus = emailSent || pushSent ? 'sent' : 'failed';
+			await this.prisma.notificationLog.update({
+				where: { id: log.id },
+				data: {
+					status: finalStatus,
+					deliveredAt: emailSent || pushSent ? new Date() : null,
+				},
+			});
 
 			return {
 				success: true,
 				message: 'Notificação enviada com sucesso',
 				code: API_CODES.success.NOTIFICATION_SENT_SUCCESSFULLY,
-				data: { notificationId: log.id },
+				data: {
+					notificationId: log.id,
+					emailSent,
+					pushSent,
+				},
 			};
 		} catch (error) {
 			throw new BadRequestException({
@@ -61,7 +92,7 @@ export class NotificationsService {
 		type: string,
 		data: any,
 		logId: string,
-	) {
+	): Promise<boolean> {
 		try {
 			const user = await this.prisma.user.findUnique({
 				where: { id: userId },
@@ -121,6 +152,8 @@ export class NotificationsService {
 					providerMessageId: emailResult.messageId || null,
 				},
 			});
+
+			return emailResult.success;
 		} catch (error) {
 			await this.prisma.notificationLog.update({
 				where: { id: logId },
@@ -131,7 +164,105 @@ export class NotificationsService {
 			});
 
 			console.error('Email notification failed:', error);
+			return false;
 		}
+	}
+
+	private async sendPushNotification(
+		userId: string,
+		type: string,
+		data: any,
+		logId: string,
+	): Promise<boolean> {
+		try {
+			// Get user devices
+			const devices = await this.prisma.userDevice.findMany({
+				where: {
+					userId,
+					isActive: true,
+				},
+				select: { deviceToken: true },
+			});
+
+			if (!devices.length) {
+				console.log('No active devices found for user:', userId);
+				return false;
+			}
+
+			const deviceTokens = devices.map((device) => device.deviceToken);
+			const pushType = this.mapToPushNotificationType(type);
+
+			let pushResult;
+			switch (type) {
+				case 'habit_reminder':
+					pushResult = await this.pushService.sendHabitReminder(
+						deviceTokens,
+						data,
+					);
+					break;
+				case 'achievement_unlocked':
+					pushResult = await this.pushService.sendAchievementUnlocked(
+						deviceTokens,
+						data,
+					);
+					break;
+				case 'streak_warning':
+					pushResult = await this.pushService.sendStreakWarning(
+						deviceTokens,
+						data,
+					);
+					break;
+				case 'weekly_report':
+					pushResult = await this.pushService.sendWeeklyReport(
+						deviceTokens,
+						data,
+					);
+					break;
+				case 'inactivity_alert':
+					pushResult = await this.pushService.sendInactivityAlert(
+						deviceTokens,
+						data,
+					);
+					break;
+				case 'goal_deadline':
+					pushResult = await this.pushService.sendGoalDeadline(
+						deviceTokens,
+						data,
+					);
+					break;
+				default:
+					pushResult = await this.pushService.sendPushNotification({
+						deviceTokens,
+						title: data.title || 'Notificação',
+						body: data.body || 'Nova notificação disponível',
+						type: pushType,
+						data: data,
+					});
+			}
+
+			// Log push notification result
+			console.log(
+				`Push notification sent: ${pushResult.success}, Success: ${pushResult.successCount}, Failed: ${pushResult.failureCount}`,
+			);
+
+			return pushResult.success;
+		} catch (error) {
+			console.error('Push notification failed:', error);
+			return false;
+		}
+	}
+
+	private mapToPushNotificationType(type: string): PushNotificationType {
+		const typeMap = {
+			habit_reminder: PushNotificationType.HABIT_REMINDER,
+			achievement_unlocked: PushNotificationType.ACHIEVEMENT_UNLOCKED,
+			streak_warning: PushNotificationType.STREAK_WARNING,
+			weekly_report: PushNotificationType.WEEKLY_REPORT,
+			inactivity_alert: PushNotificationType.INACTIVITY_ALERT,
+			goal_deadline: PushNotificationType.GOAL_DEADLINE,
+		};
+
+		return typeMap[type] || PushNotificationType.HABIT_REMINDER;
 	}
 
 	async getUserPreferences(userId: string) {
@@ -305,22 +436,51 @@ export class NotificationsService {
 				throw new Error('User email not found');
 			}
 
+			// Test email
 			const emailResult = await this.emailService.sendTestEmail(
 				user.email,
 				type,
 			);
 
+			// Test push notification
+			const devices = await this.prisma.userDevice.findMany({
+				where: {
+					userId,
+					isActive: true,
+				},
+				select: { deviceToken: true },
+			});
+
+			let pushResult = { success: false, messageId: null as string | null };
+			if (devices.length > 0) {
+				const deviceTokens = devices.map((device) => device.deviceToken);
+				const pushType = this.mapToPushNotificationType(type);
+				const pushResponse = await this.pushService.sendTestPush(
+					deviceTokens,
+					pushType,
+				);
+				pushResult = {
+					success: pushResponse.success,
+					messageId: pushResponse.messageId || null,
+				};
+			}
+
 			const log = await this.prisma.notificationLog.create({
 				data: {
 					userId,
 					type: `test_${type}`,
-					channel: 'email',
-					status: emailResult.success ? 'sent' : 'failed',
+					channel: 'email_push',
+					status: emailResult.success || pushResult.success ? 'sent' : 'failed',
 					title: '🧪 Notificação de Teste',
 					body: 'Esta é uma notificação de teste do sistema.',
-					deliveredAt: emailResult.success ? new Date() : null,
-					errorMessage: emailResult.error || null,
-					providerMessageId: emailResult.messageId || null,
+					deliveredAt:
+						emailResult.success || pushResult.success ? new Date() : null,
+					errorMessage:
+						!emailResult.success && !pushResult.success
+							? 'Email and Push failed'
+							: null,
+					providerMessageId:
+						emailResult.messageId || pushResult.messageId || null,
 					createdAt: new Date(),
 				},
 			});
@@ -332,7 +492,10 @@ export class NotificationsService {
 				data: {
 					notificationId: log.id,
 					emailDelivered: emailResult.success,
-					messageId: emailResult.messageId,
+					pushDelivered: pushResult.success,
+					emailMessageId: emailResult.messageId,
+					pushMessageId: pushResult.messageId,
+					deviceCount: devices.length,
 				},
 			};
 		} catch (error) {
@@ -359,6 +522,6 @@ export class NotificationsService {
 	}
 
 	isHealthy(): boolean {
-		return this.emailService.isHealthy();
+		return this.emailService.isHealthy() && this.pushService.isHealthy();
 	}
 }
