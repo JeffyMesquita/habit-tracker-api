@@ -27,19 +27,22 @@ model User {
   role   Role   @relation(fields: [roleId], references: [id])
   roleId String
 
-  profile              Profile?
-  address              Address?
-  habits               Habit[]
-  PremiumSubscription  PremiumSubscription?
-  DailyHabitProgress   DailyHabitProgress[]
-  DailyProgressSummary DailyProgressSummary[]
-  HabitStreak          HabitStreak[]
-  UserMetrics          UserMetrics[]
-  UserGoals            UserGoals[]
-  UserActivityLog      UserActivityLog[]
-  Achievements         Achievements[]
-  UserPreferences      UserPreferences[]
-  UserInteractions     UserInteractions[]
+  profile                 Profile?
+  address                 Address?
+  habits                  Habit[]
+  PremiumSubscription     PremiumSubscription?
+  DailyHabitProgress      DailyHabitProgress[]
+  DailyProgressSummary    DailyProgressSummary[]
+  HabitStreak             HabitStreak[]
+  UserMetrics             UserMetrics[]
+  UserGoals               UserGoals[]
+  UserActivityLog         UserActivityLog[]
+  Achievements            Achievements[]
+  UserPreferences         UserPreferences[]
+  UserInteractions        UserInteractions[]
+  NotificationPreferences NotificationPreferences?
+  UserDevice              UserDevice[]
+  NotificationLog         NotificationLog[]
 
   @@map("users")
 }
@@ -311,4 +314,93 @@ model UserSurveyResponses {
   timestamp  DateTime @default(now())
 
   @@map("user_survey_responses")
+}
+
+// Notification System Models
+model NotificationPreferences {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Canais habilitados
+  emailEnabled Boolean @default(true)
+  pushEnabled  Boolean @default(true)
+  smsEnabled   Boolean @default(false)
+
+  // Tipos de notificação
+  habitReminders   Boolean @default(true)
+  achievements     Boolean @default(true)
+  weeklyReports    Boolean @default(true)
+  monthlyReports   Boolean @default(true)
+  inactivityAlerts Boolean @default(true)
+  streakWarnings   Boolean @default(true)
+
+  // Configurações avançadas
+  quietHoursStart String @default("22:00")
+  quietHoursEnd   String @default("08:00")
+  timezone        String @default("America/Sao_Paulo")
+  language        String @default("pt-BR")
+  frequency       String @default("immediate") // immediate, batched, digest
+
+  // Configurações específicas
+  habitReminderFrequency String @default("once") // once, twice, multiple
+  inactivityThreshold    Int    @default(3) // dias
+  streakWarningHours     Int    @default(6) // horas antes do deadline
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("notification_preferences")
+}
+
+model UserDevice {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Device Info
+  deviceToken String  @unique
+  platform    String // ios, android, web
+  deviceType  String // phone, tablet, desktop
+  appVersion  String?
+  osVersion   String?
+
+  // Status
+  isActive Boolean  @default(true)
+  lastUsed DateTime @default(now())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("user_devices")
+}
+
+model NotificationLog {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Notification Info
+  type    String // habit_reminder, achievement_unlocked, etc.
+  channel String // email, push, sms
+  status  String // queued, sent, delivered, opened, clicked, failed
+
+  // Content
+  title      String?
+  body       String?
+  templateId String?
+
+  // Delivery Info
+  providerMessageId String?
+  errorMessage      String?
+
+  // Tracking
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  openedAt    DateTime?
+  clickedAt   DateTime?
+
+  createdAt DateTime @default(now())
+
+  @@map("notification_logs")
 }
