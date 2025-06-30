@@ -7,7 +7,6 @@ import {
 	EmailData,
 	EmailSendResult,
 } from '../providers/email/email.provider.interface';
-import API_CODES from '@/misc/API/codes';
 
 export interface EmailTemplateData {
 	[key: string]: any;
