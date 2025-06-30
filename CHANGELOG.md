@@ -5,7 +5,7 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
-## [1.2.0] - 2025-01-29
+## [1.2.0] - 2025-06-29
 
 ### 🎨 **Sistema de Categorias e Reports Avançados**
 
@@ -92,7 +92,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
-## [1.1.1] - 2025-01-29
+## [1.1.1] - 2025-06-29
 
 ### 🔧 **Finalização do Sistema de Metas**
 
@@ -150,7 +150,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
-## [1.1.0] - 2025-01-29
+## [1.1.0] - 2025-06-15
 
 ### 🎉 **Sprint 2 - Gamificação e Relatórios**
 
@@ -263,7 +263,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
-## [1.0.0] - 2025-01-29
+## [1.0.0] - 2025-06-01
 
 ### 🎉 **Sprint 1 - Lançamento Inicial**
 
@@ -370,7 +370,7 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ---
 
-## [0.1.0] - 2025-01-15
+## [0.1.0] - 2025-05-15
 
 ### 🚧 **Setup Inicial**
 
@@ -388,32 +388,32 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 ## 🛣️ **Próximas Versões Planejadas**
 
-### [1.1.0] - Sprint 2 (Fevereiro 2025)
+### [1.3.0] - Sprint 3 (Agosto 2025)
 
 #### **🎯 Planejado**
 
-- Sistema de metas pessoais
-- Achievements e gamificação básica
-- Relatórios semanais e mensais
-- Notificações por email
+- Sistema completo de notificações (email + push)
+- Preferências avançadas do usuário
+- Analytics de engagement e delivery
+- Templates de notificação personalizáveis
 
-### [1.2.0] - Sprint 3 (Março 2025)
+### [1.4.0] - Sprint 4 (Setembro 2025)
 
 #### **🚀 Planejado**
 
-- Notificações push
-- Preferências avançadas do usuário
+- Performance & caching com Redis
 - Sistema de backup e sincronização
-- Performance otimizations
+- Features sociais básicas
+- Integração com wearables
 
-### [2.0.0] - Sprint 4+ (Futuro)
+### [2.0.0] - Sprint 5+ (Q4 2025)
 
 #### **🌟 Planejado**
 
-- Integração com wearables
-- Features sociais
 - IA e insights personalizados
+- Features sociais completas
 - App mobile companion
+- Integrações com terceiros
 
 ---
 

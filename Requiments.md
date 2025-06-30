@@ -23,7 +23,7 @@
 - **📱 35+ APIs funcionais** (8 Auth + 8 Habits + 7 Goals + 4 Achievements + 3+ Reports + 2 Analytics + 3 Profile)
 - **🧪 62 testes automatizados** (100% aprovação)
 
-### 🚀 Próximo Sprint (Sprint 3 - Fevereiro 2025)
+### 🚀 Próximo Sprint (Sprint 3 - Agosto 2025)
 
 - **📧 Sistema de Notificações** (email + push notifications)
 - **⚙️ Preferências de Usuário** (notificações, tema, configurações)
@@ -351,6 +351,6 @@
 
 ---
 
-**📅 Última atualização**: Janeiro 2025 | **Versão**: 1.2.0
+**📅 Última atualização**: Junho 2025 | **Versão**: 1.2.0
 
 **📚 Para documentação completa, consulte [docs/INDEX.md](docs/INDEX.md)**

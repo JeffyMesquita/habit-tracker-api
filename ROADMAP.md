@@ -206,7 +206,7 @@
 
 ## 🚀 **Sprint 3: Sistema de Notificações**
 
-> **Status**: 📋 Planning Phase | **Duration**: 4 weeks | **Start**: Feb 2025
+> **Status**: 📋 Planning Phase | **Duration**: 4 weeks | **Start**: Aug 2025
 
 ### **🎯 Objetivos Principais**
 
@@ -358,7 +358,7 @@ GET    /app/notifications/logs          // Logs de notificações
 
 ### **🎯 Sprint 4: User Experience & Performance**
 
-> **Timeline**: Mar 2025 | **Duration**: 3 weeks
+> **Timeline**: Sep 2025 | **Duration**: 3 weeks
 
 #### **🚀 Performance Optimization**
 
@@ -390,7 +390,7 @@ GET    /app/notifications/logs          // Logs de notificações
 
 ### **🌟 Sprint 5: Social Features**
 
-> **Timeline**: Apr 2025 | **Duration**: 4 weeks
+> **Timeline**: Oct 2025 | **Duration**: 4 weeks
 
 #### **👥 Social Core**
 
@@ -414,7 +414,7 @@ GET    /app/notifications/logs          // Logs de notificações
 
 ### **🧠 Sprint 6: AI & Machine Learning**
 
-> **Timeline**: May-Jun 2025 | **Duration**: 6 weeks
+> **Timeline**: Nov-Dec 2025 | **Duration**: 6 weeks
 
 #### **🤖 Smart Insights**
 
@@ -438,7 +438,7 @@ GET    /app/notifications/logs          // Logs de notificações
 
 ### **🔌 Sprint 7: Integrations & Ecosystem**
 
-> **Timeline**: Jul-Aug 2025 | **Duration**: 6 weeks
+> **Timeline**: Jan-Feb 2026 | **Duration**: 6 weeks
 
 #### **⌚ Wearables Integration**
 
@@ -663,6 +663,6 @@ Performance Metrics  // Application insights
 
 ---
 
-**🎯 Este roadmap é um documento vivo que evolui com o projeto. Última atualização: Janeiro 2025**
+**🎯 Este roadmap é um documento vivo que evolui com o projeto. Última atualização: Junho 2025**
 
 **⭐ Se este projeto está sendo útil, considere dar uma estrela no GitHub!**
