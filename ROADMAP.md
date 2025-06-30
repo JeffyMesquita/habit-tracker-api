@@ -176,13 +176,16 @@
 
 ### **📈 Entregáveis Sprint 2**
 
-- **+13 APIs novas** (total: 34+)
+- **+14 APIs novas** (total: 35+)
 - **+36 testes** (total: 62, 100% pass)
 - **3 módulos novos** completamente integrados
 - **Arquitetura sem circular dependencies**
 - **Gamificação completa** funcional
 - **Sistema de conclusão de metas** com persistência real
 - **Database schema** atualizado com tracking de completion
+- **🆕 Sistema de categorias** para organização de hábitos
+- **🆕 Tracking individual de streaks** por hábito específico
+- **🆕 Reports avançados** com análise por categoria
 
 ### **🏆 Achievements Implementados**
 

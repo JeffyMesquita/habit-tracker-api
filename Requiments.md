@@ -17,7 +17,10 @@
 - **🏆 Sistema de Achievements COMPLETO** (12 conquistas, desbloqueio automático)
 - **📊 Relatórios Avançados COMPLETO** (semanal, mensal, customizável, PDF/CSV/JSON)
 - **⚡ Integração Automática** (Habits → Goals → Achievements)
-- **📱 34+ APIs funcionais** (8 Auth + 8 Habits + 7 Goals + 4 Achievements + 3+ Reports + 2 Analytics + 3 Profile)
+- **🆕 Sistema de Categorias** (organização de hábitos por área: Saúde, Fitness, Trabalho, etc.)
+- **🆕 Tracking Individual de Streaks** (streaks específicos por hábito)
+- **🆕 Reports com Análise por Categoria** (breakdown e insights por categoria)
+- **📱 35+ APIs funcionais** (8 Auth + 8 Habits + 7 Goals + 4 Achievements + 3+ Reports + 2 Analytics + 3 Profile)
 - **🧪 62 testes automatizados** (100% aprovação)
 
 ### 🚀 Próximo Sprint (Sprint 3 - Fevereiro 2025)
@@ -133,6 +136,18 @@
   - `GET /app/habits?period=month` (mês atual)
   - `GET /app/habits?period=all` (todos os hábitos)
 
+**2.7 [✅] RF012.1 - Categorização de Hábitos:**
+
+- Sistema deve permitir categorizar hábitos para melhor organização.
+- **Status**: ✅ **IMPLEMENTADO** (v1.2.0)
+- **Recursos**: Campo `category` opcional, fallback para "Geral", suporte a categorias personalizadas
+
+**2.8 [✅] RF012.2 - Filtros por Categoria:**
+
+- Sistema deve permitir filtrar hábitos por categoria específica.
+- **Status**: ✅ **IMPLEMENTADO** (preparado para frontend)
+- **Recursos**: Filtros dinâmicos, múltiplas categorias, performance otimizada
+
 ### 3. Analytics e Métricas ✅
 
 **3.1 [✅] RF013 - Estatísticas de Progresso:**
@@ -164,6 +179,18 @@
 - **Status**: ✅ **IMPLEMENTADO**
 - **Rotas**: `POST /app/reports/generate`, `GET /app/reports/weekly`, `GET /app/reports/monthly`
 - **Recursos**: Múltiplos formatos (JSON, CSV, PDF), análise de tendências, insights automáticos
+
+**3.6 [✅] RF017.1 - Tracking Individual de Streaks:**
+
+- Sistema deve rastrear streaks específicos por hábito individual.
+- **Status**: ✅ **IMPLEMENTADO** (v1.2.0)
+- **Recursos**: Relação `habitId` em HabitStreak, precisão melhorada, histórico detalhado
+
+**3.7 [✅] RF017.2 - Analytics por Categoria:**
+
+- Sistema deve fornecer analytics detalhados por categoria de hábito.
+- **Status**: ✅ **IMPLEMENTADO** (v1.2.0)
+- **Recursos**: Category breakdown, completion rates por categoria, ranking automático
 
 ### 4. Sistema de Metas ✅
 
@@ -219,6 +246,18 @@
 - **Status**: ✅ **IMPLEMENTADO** (semanal e mensal)
 - **Recursos**: Insights automáticos, análise de tendências, comparações
 
+**6.3 [✅] RF024.1 - Reports com Análise por Categoria:**
+
+- Relatórios devem incluir breakdown detalhado por categoria de hábito.
+- **Status**: ✅ **IMPLEMENTADO** (v1.2.0)
+- **Recursos**: Category breakdown, top categories ranking, insights automáticos por área
+
+**6.4 [✅] RF024.2 - Enhanced Reports Structure:**
+
+- Sistema deve fornecer estrutura de resposta rica para relatórios.
+- **Status**: ✅ **IMPLEMENTADO** (v1.2.0)
+- **Recursos**: Summary consolidado, insights automáticos, weekly trends, category performance
+
 ### 7. Perfil do Usuário ✅
 
 **7.1 [✅] RF025 - Visualização de Perfil:**
@@ -261,7 +300,8 @@
 
 - **Sprint 1**: 21 APIs, 26 testes, MVP completo
 - **Sprint 2**: +13 APIs, +36 testes, Gamificação completa
-- **Total**: 34+ APIs, 62 testes, 7 módulos funcionais
+- **v1.2.0**: +3 major features (categorias, tracking individual, enhanced reports)
+- **Total**: 35+ APIs, 62 testes, 7 módulos funcionais, sistema de categorias completo
 
 ### **📈 Status por Categoria**
 
@@ -311,6 +351,6 @@
 
 ---
 
-**📅 Última atualização**: Janeiro 2025 | **Versão**: 1.1.1
+**📅 Última atualização**: Janeiro 2025 | **Versão**: 1.2.0
 
 **📚 Para documentação completa, consulte [docs/INDEX.md](docs/INDEX.md)**

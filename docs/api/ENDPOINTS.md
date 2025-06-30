@@ -293,31 +293,85 @@
 
 ### **POST /app/reports/generate**
 
-- **Função**: Gerar relatório customizado
-- **Status**: ✅ Complete
+- **Função**: Gerar relatório customizado avançado
+- **Status**: ✅ Complete with Enhanced Features
 - **Auth**: Required
-- **Body**: `{ type, period, format, filters }`
+- **Body**: `{ type, period, format, filters, includeAchievements? }`
 - **Types**: weekly, monthly, custom, quarterly, yearly
 - **Formats**: JSON, CSV, PDF
-- **Response**: Relatório gerado ou job ID
+- **🆕 Enhanced Features**:
+  - **Category Breakdown**: Análise por categoria de hábito
+  - **Top Categories**: Ranking das 3 melhores categorias
+  - **Individual Streak Tracking**: Streaks específicos por hábito
+  - **Advanced Insights**: Análise automática de performance
+- **Response Structure**:
+
+```json
+{
+  "data": {
+    "period": { "startDate": "2025-01-01", "endDate": "2025-01-29" },
+    "summary": {
+      "totalHabits": 5,
+      "totalCompletions": 85,
+      "overallCompletionRate": 78.5,
+      "activeDays": 22,
+      "categoryBreakdown": {
+        "Saúde": { "completionRate": 85.2, "totalHabits": 2, "completedDays": 23, "totalDays": 27 },
+        "Fitness": { "completionRate": 72.1, "totalHabits": 2, "completedDays": 39, "totalDays": 54 },
+        "Trabalho": { "completionRate": 90.3, "totalHabits": 1, "completedDays": 28, "totalDays": 31 }
+      }
+    },
+    "habits": [
+      {
+        "id": "habit-123",
+        "name": "Exercitar-se",
+        "category": "Fitness",
+        "daysCompleted": 20,
+        "totalDays": 29,
+        "completionRate": 68.97,
+        "currentStreak": 5,
+        "longestStreak": 12
+      }
+    ],
+    "insights": {
+      "bestPerformingHabits": [...],
+      "needsAttentionHabits": [...],
+      "topCategories": [
+        { "category": "Trabalho", "completionRate": 90.3, "totalHabits": 1 },
+        { "category": "Saúde", "completionRate": 85.2, "totalHabits": 2 },
+        { "category": "Fitness", "completionRate": 72.1, "totalHabits": 2 }
+      ],
+      "weeklyTrends": [...]
+    }
+  }
+}
+```
 
 ### **GET /app/reports/weekly**
 
-- **Função**: Relatório semanal automatizado
-- **Status**: ✅ Complete
+- **Função**: Relatório semanal automatizado com categoria analysis
+- **Status**: ✅ Complete with Enhanced Analytics
 - **Auth**: Required
-- **Query**: `format, includeInsights`
-- **Response**: Relatório da semana atual
-- **Features**: Insights automáticos, comparações
+- **Query**: `format, includeInsights, weekOffset?`
+- **Response**: Relatório da semana atual/específica
+- **🆕 Features**:
+  - Category performance por semana
+  - Individual habit streak tracking
+  - Week number e comparações
+  - Top categories da semana
 
 ### **GET /app/reports/monthly**
 
-- **Função**: Relatório mensal automatizado
-- **Status**: ✅ Complete
+- **Função**: Relatório mensal automatizado com insights avançados
+- **Status**: ✅ Complete with Enhanced Analytics
 - **Auth**: Required
-- **Query**: `format, includeYearComparison`
-- **Response**: Relatório do mês atual
-- **Features**: Trends mensais, year-over-year
+- **Query**: `format, includeYearComparison, monthOffset?`
+- **Response**: Relatório do mês atual/específico
+- **🆕 Features**:
+  - Monthly category breakdown
+  - Month-over-month comparisons
+  - Localized month names (pt-BR)
+  - Enhanced habit analytics per category
 
 ---
 
