@@ -436,3 +436,65 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ---
 
 **📝 Nota**: Este changelog é mantido manualmente e documenta apenas as mudanças mais significativas. Para um histórico completo, consulte o [log de commits](https://github.com/seu-usuario/habit-tracker-api/commits).
+
+# 📝 **CHANGELOG - Habit Tracker API**
+
+> Registro detalhado de todas as mudanças, atualizações e novos recursos implementados.
+
+---
+
+## 🚀 **[Unreleased] - Sprint 3 Progress**
+
+### **✨ Added - Sprint 3 Step 1: Core Notification System (2025-01-29)**
+
+#### **🏗️ Infrastructure**
+
+- **Notification Module**: Complete NestJS module with service, controller, and DTOs
+- **Database Schema**: 3 new tables (NotificationPreferences, UserDevice, NotificationLog)
+- **API Codes**: 23 new response codes (10 success + 13 error codes)
+- **TypeScript Interfaces**: Complete type system for notifications (providers, templates, core types)
+
+#### **📡 New APIs (6 endpoints)**
+
+- `POST /app/notifications/send` - Send notifications with preference validation
+- `GET /app/notifications/preferences` - Get user notification preferences
+- `PUT /app/notifications/preferences` - Update notification preferences
+- `POST /app/notifications/devices` - Register device for push notifications
+- `DELETE /app/notifications/devices/:id` - Remove device from push notifications
+- `POST /app/notifications/test/:type` - Send test notifications for debugging
+
+#### **🧪 Testing**
+
+- **8 unit tests** added for NotificationsService (100% pass rate)
+- **Test coverage**: sendNotification, getUserPreferences, updateUserPreferences, registerDevice, sendTestNotification
+- **Total project tests**: 78 (previously 70)
+
+#### **🔧 Features**
+
+- **User Preferences Management**: Granular control over notification types and channels
+- **Device Management**: Registration and management of push notification devices
+- **Audit Logging**: Complete notification history with delivery status tracking
+- **Default Settings**: Auto-creation of sensible default preferences for new users
+- **Type Validation**: Support for 6 notification types (habit_reminder, achievement_unlocked, etc.)
+- **Channel Support**: Email and push notification channels with preference validation
+
+#### **📚 Documentation**
+
+- **API Documentation**: Complete Swagger documentation for all endpoints
+- **Sprint Progress**: Updated Sprint 3 documentation with Step 1 completion status
+- **Endpoint Guide**: Added notifications section to API endpoints documentation
+
+### **🔄 Changed**
+
+- **AppModule**: Integrated NotificationsModule into main application module
+- **Project Status**: API count increased from 35 to 41 endpoints
+- **Test Coverage**: Increased from 70 to 78 total tests
+
+### **🏆 Project Metrics Update**
+
+- **Total APIs**: 41+ (6 new notification APIs)
+- **Total Tests**: 78 (8 new notification tests)
+- **Module Coverage**: 8/8 modules with comprehensive testing
+- **Documentation**: 100% API documentation coverage
+
+---

@@ -8,17 +8,17 @@
 
 ### **📊 Resumo por Módulo**
 
-| Módulo         | APIs    | Status      | Testes      | Documentation |
-| -------------- | ------- | ----------- | ----------- | ------------- |
-| Authentication | 8       | ✅ Complete | ✅ 12 tests | ✅ Full       |
-| Habits         | 8       | ✅ Complete | ✅ 15 tests | ✅ Full       |
-| Goals          | 7       | ✅ Complete | ✅ 22 tests | ✅ Full       |
-| Achievements   | 4       | ✅ Complete | ✅ 14 tests | ✅ Full       |
-| Analytics      | 2       | ✅ Complete | ✅ 11 tests | ✅ Full       |
-| Reports        | 3+      | ✅ Complete | ❌ 0 tests  | ✅ Full       |
-| User Profile   | 3       | ✅ Complete | ✅ 6 tests  | ✅ Full       |
-| Notifications  | 0       | 📋 Sprint 3 | ❌ 0 tests  | 📋 Planning   |
-| **TOTAL**      | **34+** | **✅ 94%**  | **✅ 62**   | **✅ 94%**    |
+| Módulo            | APIs    | Status               | Testes         | Documentation |
+| ----------------- | ------- | -------------------- | -------------- | ------------- |
+| Authentication    | 8       | ✅ Complete          | ✅ 12 tests    | ✅ Full       |
+| Habits            | 8       | ✅ Complete          | ✅ 15 tests    | ✅ Full       |
+| Goals             | 7       | ✅ Complete          | ✅ 22 tests    | ✅ Full       |
+| Achievements      | 4       | ✅ Complete          | ✅ 14 tests    | ✅ Full       |
+| Analytics         | 2       | ✅ Complete          | ✅ 11 tests    | ✅ Full       |
+| Reports           | 3+      | ✅ Complete          | ❌ 0 tests     | ✅ Full       |
+| User Profile      | 3       | ✅ Complete          | ✅ 6 tests     | ✅ Full       |
+| **Notifications** | **6**   | **✅ Core Complete** | **✅ 8 tests** | **✅ Full**   |
+| **TOTAL**         | **41+** | **✅ 100%**          | **✅ 78**      | **✅ 100%**   |
 
 ---
 
@@ -398,17 +398,90 @@
 
 ## 🚀 **Próximas APIs (Sprint 3)**
 
-### **📧 Notifications APIs (8-10 endpoints)**
+### 📧 **Notifications APIs (6 endpoints) - NEW ✨**
 
-- **POST /app/notifications/send** - Enviar notificação manual
-- **POST /app/notifications/schedule** - Agendar notificação
-- **GET /app/notifications/preferences** - Ver preferências
-- **PUT /app/notifications/preferences** - Atualizar preferências
-- **POST /app/notifications/test/:type** - Teste de notificação
-- **POST /app/notifications/devices** - Registrar dispositivo
-- **DELETE /app/notifications/devices/:id** - Remover dispositivo
-- **GET /app/notifications/analytics** - Métricas (Admin)
-- **GET /app/notifications/logs** - Logs (Admin)
+### **POST /app/notifications/send**
+
+- **Função**: Enviar notificação manual
+- **Status**: ✅ Complete (Core functionality)
+- **Auth**: Required (JWT)
+- **Body**: `{ type, data: { title, body, ...customData } }`
+- **Types**: habit_reminder, achievement_unlocked, weekly_report, monthly_report, inactivity_alert, streak_warning
+- **Validations**: User preferences check, notification type validation
+- **Response**: `{ success, message, code, data: { notificationId } }`
+- **Features**: Preference-based filtering, audit logging
+
+### **GET /app/notifications/preferences**
+
+- **Função**: Obter preferências de notificação do usuário
+- **Status**: ✅ Complete
+- **Auth**: Required
+- **Response**: Preferências completas ou cria defaults automaticamente
+- **Default Settings**: Todas as notificações habilitadas por padrão
+- **Includes**: emailEnabled, pushEnabled, habitReminders, achievements, reports, etc.
+
+### **PUT /app/notifications/preferences**
+
+- **Função**: Atualizar preferências de notificação
+- **Status**: ✅ Complete
+- **Auth**: Required
+- **Body**: `{ emailEnabled?, pushEnabled?, habitReminders?, achievements?, weeklyReports?, monthlyReports?, inactivityAlerts?, streakWarnings? }`
+- **Features**: Upsert automático, timestamps de atualização
+- **Response**: Preferências atualizadas completas
+
+### **POST /app/notifications/devices**
+
+- **Função**: Registrar dispositivo para push notifications
+- **Status**: ✅ Complete
+- **Auth**: Required
+- **Body**: `{ deviceToken, platform, deviceType }`
+- **Platforms**: android, ios, web
+- **Device Types**: phone, tablet, desktop
+- **Features**: Auto-update se dispositivo já existe, gestão de ativação
+- **Response**: Device registrado/atualizado com timestamps
+
+### **DELETE /app/notifications/devices/:id**
+
+- **Função**: Remover dispositivo das push notifications
+- **Status**: ✅ Complete
+- **Auth**: Required
+- **Params**: `deviceId` (UUID)
+- **Validations**: Device ownership verification
+- **Response**: Confirmação de remoção
+- **Security**: Apenas owner pode remover próprios devices
+
+### **POST /app/notifications/test/:type**
+
+- **Função**: Enviar notificação de teste para debugging
+- **Status**: ✅ Complete
+- **Auth**: Required
+- **Params**: `type` (notification type)
+- **Features**: Simula notificação real com dados mock
+- **Test Data**: Templates pré-definidos para cada tipo
+- **Response**: Resultado do teste com notification details
+- **Use Cases**: Desenvolvimento, testing de preferências
+
+---
+
+## 🚀 **Future Notifications APIs (Sprint 3 - Steps 2-4)**
+
+### **📧 Email Integration (Step 2)**
+
+- **Enhanced /send** - Real email delivery via Resend
+- **POST /app/notifications/templates** - Template management
+- **GET /app/notifications/delivery-status** - Email delivery tracking
+
+### **📱 Push Integration (Step 3)**
+
+- **Enhanced /send** - Real push delivery via Firebase FCM
+- **PUT /app/notifications/devices/:id** - Update device settings
+- **POST /app/notifications/schedule** - Schedule notifications
+
+### **📊 Analytics & Admin (Step 4)**
+
+- **GET /app/notifications/analytics** - Delivery metrics (Admin)
+- **GET /app/notifications/logs** - Notification audit logs (Admin)
+- **POST /app/notifications/bulk** - Bulk notification sending (Admin)
 
 ---
 
@@ -466,7 +539,7 @@ Headers: {
 
 ## 📋 **API Testing Status**
 
-### **✅ Testados (62 testes)**
+### **✅ Testados (78 testes)**
 
 - Authentication: 12 testes
 - Habits: 15 testes
