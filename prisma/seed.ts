@@ -37,17 +37,12 @@ async function main(): Promise<void> {
 	const roles = await Promise.all([
 		prisma.role.create({
 			data: {
-				name: 'admin',
+				name: '@ADMIN',
 			},
 		}),
 		prisma.role.create({
 			data: {
-				name: 'user',
-			},
-		}),
-		prisma.role.create({
-			data: {
-				name: 'premium',
+				name: '@USER',
 			},
 		}),
 	]);
@@ -64,7 +59,7 @@ async function main(): Promise<void> {
 				email: 'admin@habittracker.com',
 				password: hashedPassword,
 				verified: true,
-				roleId: roles[0].id, // admin
+				roleId: roles[0].id, // @ADMIN
 			},
 		}),
 		// Usuário regular ativo
@@ -73,16 +68,16 @@ async function main(): Promise<void> {
 				email: 'joao.silva@email.com',
 				password: hashedPassword,
 				verified: true,
-				roleId: roles[1].id, // user
+				roleId: roles[1].id, // @USER
 			},
 		}),
-		// Usuário premium
+		// Usuário regular ativo
 		prisma.user.create({
 			data: {
 				email: 'maria.santos@email.com',
 				password: hashedPassword,
 				verified: true,
-				roleId: roles[2].id, // premium
+				roleId: roles[1].id, // @USER
 			},
 		}),
 		// Usuário iniciante
@@ -91,7 +86,7 @@ async function main(): Promise<void> {
 				email: 'pedro.costa@email.com',
 				password: hashedPassword,
 				verified: true,
-				roleId: roles[1].id, // user
+				roleId: roles[1].id, // @USER
 			},
 		}),
 		// Usuário não verificado
@@ -100,7 +95,7 @@ async function main(): Promise<void> {
 				email: 'ana.oliveira@email.com',
 				password: hashedPassword,
 				verified: false,
-				roleId: roles[1].id, // user
+				roleId: roles[1].id, // @USER
 			},
 		}),
 	]);

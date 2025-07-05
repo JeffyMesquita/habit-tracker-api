@@ -4,7 +4,7 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - .:/home/node/app
+      - app_data:/home/node/app
       - /home/node/app/node_modules
     environment:
       - NODE_ENV=development
@@ -41,6 +41,7 @@ services:
 
 volumes:
   postgres_data:
+  app_data:
 
 networks:
   habit-tracker-network:

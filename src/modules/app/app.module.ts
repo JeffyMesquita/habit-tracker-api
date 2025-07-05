@@ -7,8 +7,6 @@ import { GoalsModule } from './goals/goals.module';
 import { AchievementsModule } from './achievements/achievements.module';
 import { ReportsModule } from './reports/reports.module';
 import { NotificationsModule } from './notifications/notifications.module';
-// import { UserController } from './user/user.controller';
-// import { UserService } from './user/user.service';
 
 @Module({
 	imports: [

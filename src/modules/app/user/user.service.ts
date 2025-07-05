@@ -42,12 +42,23 @@ export class UserService {
 					});
 				}
 
+				console.log(ROLES.USER);
+
 				const hashedPassword = bcrypt.hashSync(password, 10);
 				const role = await ctx.role.findUnique({
 					where: {
 						name: ROLES.USER,
 					},
 				});
+
+				console.log(role);
+
+				if (!role) {
+					throw new BadRequestException({
+						message: 'Role não encontrada!',
+						code: API_CODES.error.ROLE_NOT_FOUND,
+					});
+				}
 
 				const newUser = await ctx.user.create({
 					data: {
@@ -119,22 +130,38 @@ export class UserService {
 	}
 
 	async confirmEmail(req: Request, code: string) {
-		const now = dayjs().toDate();
 		const token = req.headers['authorization'] as string;
 
-		if (!token) {
+		if (!token || !token.startsWith('Bearer ')) {
 			throw new UnauthorizedException({
-				message: 'Token inválido!',
+				message: 'Token não informado ou mal formatado!',
 				code: API_CODES.error.INVALID_TOKEN,
 			});
 		}
 
 		const userToken = token.split(' ')[1];
 
-		const decoded: JwtPayload = jwt.verify(
-			userToken,
-			this.config.get('JWT_SEND_EMAIL_CODE'),
-		) as JwtPayload;
+		let decoded: JwtPayload;
+		try {
+			decoded = jwt.verify(
+				userToken,
+				this.config.get('JWT_SEND_EMAIL_CODE'),
+			) as JwtPayload;
+		} catch (error: any) {
+			console.error('Erro ao verificar JWT:', error?.name, error?.message);
+			if (error?.name === 'TokenExpiredError') {
+				throw new UnauthorizedException({
+					message: 'Token expirado!',
+					code: API_CODES.error.INVALID_TOKEN,
+				});
+			}
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
+
+		const now = dayjs().toDate();
 
 		const userConfirmEmail = await this.prisma.confirmEmail.findFirst({
 			where: {
@@ -395,19 +422,34 @@ export class UserService {
 	) {
 		const token = req.headers['authorization'] as string;
 
-		if (!token) {
-			throw new BadRequestException({
-				message: 'Token inválido!',
+		if (!token || !token.startsWith('Bearer ')) {
+			throw new UnauthorizedException({
+				message: 'Token não informado ou mal formatado!',
 				code: API_CODES.error.INVALID_TOKEN,
 			});
 		}
 
 		const userToken = token.split(' ')[1];
 
-		const decoded: JwtPayload = jwt.verify(
-			userToken,
-			this.config.get('JWT_FORGOT_PASSWORD'),
-		) as JwtPayload;
+		let decoded: JwtPayload;
+		try {
+			decoded = jwt.verify(
+				userToken,
+				this.config.get('JWT_FORGOT_PASSWORD'),
+			) as JwtPayload;
+		} catch (error: any) {
+			console.error('Erro ao verificar JWT:', error?.name, error?.message);
+			if (error?.name === 'TokenExpiredError') {
+				throw new UnauthorizedException({
+					message: 'Token expirado!',
+					code: API_CODES.error.INVALID_TOKEN,
+				});
+			}
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
 
 		if (!decoded || !decoded.userId) {
 			throw new UnauthorizedException({
@@ -492,19 +534,34 @@ export class UserService {
 	async me(req: Request) {
 		const token = req.headers['authorization'] as string;
 
-		if (!token) {
-			throw new BadRequestException({
-				message: 'Token inválido!',
-				code: API_CODES.error.UNAUTHORIZED_ACCESS_TOKEN,
+		if (!token || !token.startsWith('Bearer ')) {
+			throw new UnauthorizedException({
+				message: 'Token não informado ou mal formatado!',
+				code: API_CODES.error.INVALID_TOKEN,
 			});
 		}
 
 		const userToken = token.split(' ')[1];
 
-		const decoded: JwtPayload = jwt.verify(
-			userToken,
-			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-		) as JwtPayload;
+		let decoded: JwtPayload;
+		try {
+			decoded = jwt.verify(
+				userToken,
+				this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+			) as JwtPayload;
+		} catch (error: any) {
+			console.error('Erro ao verificar JWT:', error?.name, error?.message);
+			if (error?.name === 'TokenExpiredError') {
+				throw new UnauthorizedException({
+					message: 'Token expirado!',
+					code: API_CODES.error.INVALID_TOKEN,
+				});
+			}
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
 
 		if (!decoded || !decoded.userId) {
 			throw new BadRequestException({
@@ -541,19 +598,34 @@ export class UserService {
 	async logout(req: Request) {
 		const token = req.headers['authorization'] as string;
 
-		if (!token) {
+		if (!token || !token.startsWith('Bearer ')) {
 			throw new UnauthorizedException({
-				message: 'Token inválido!',
-				code: API_CODES.error.UNAUTHORIZED_ACCESS_TOKEN,
+				message: 'Token não informado ou mal formatado!',
+				code: API_CODES.error.INVALID_TOKEN,
 			});
 		}
 
 		const userToken = token.split(' ')[1];
 
-		const decoded: JwtPayload = jwt.verify(
-			userToken,
-			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-		) as JwtPayload;
+		let decoded: JwtPayload;
+		try {
+			decoded = jwt.verify(
+				userToken,
+				this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+			) as JwtPayload;
+		} catch (error: any) {
+			console.error('Erro ao verificar JWT:', error?.name, error?.message);
+			if (error?.name === 'TokenExpiredError') {
+				throw new UnauthorizedException({
+					message: 'Token expirado!',
+					code: API_CODES.error.INVALID_TOKEN,
+				});
+			}
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
 
 		const user = await this.prisma.user.findFirst({
 			where: {
@@ -672,19 +744,34 @@ export class UserService {
 	async updateProfile(req: Request, body: UpdateProfileDTO) {
 		const token = req.headers['authorization'] as string;
 
-		if (!token) {
-			throw new BadRequestException({
-				message: 'Token inválido!',
+		if (!token || !token.startsWith('Bearer ')) {
+			throw new UnauthorizedException({
+				message: 'Token não informado ou mal formatado!',
 				code: API_CODES.error.INVALID_TOKEN,
 			});
 		}
 
 		const userToken = token.split(' ')[1];
 
-		const decoded: JwtPayload = jwt.verify(
-			userToken,
-			this.config.get('JWT_ACCESS_TOKEN_SECRET'),
-		) as JwtPayload;
+		let decoded: JwtPayload;
+		try {
+			decoded = jwt.verify(
+				userToken,
+				this.config.get('JWT_ACCESS_TOKEN_SECRET'),
+			) as JwtPayload;
+		} catch (error: any) {
+			console.error('Erro ao verificar JWT:', error?.name, error?.message);
+			if (error?.name === 'TokenExpiredError') {
+				throw new UnauthorizedException({
+					message: 'Token expirado!',
+					code: API_CODES.error.INVALID_TOKEN,
+				});
+			}
+			throw new UnauthorizedException({
+				message: 'Token inválido!',
+				code: API_CODES.error.INVALID_TOKEN,
+			});
+		}
 
 		if (!decoded || !decoded.userId) {
 			throw new BadRequestException({
